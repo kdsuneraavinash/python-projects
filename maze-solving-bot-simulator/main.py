@@ -1,26 +1,29 @@
-import cv2
-import numpy as np
-from datatypes import Point, Direction
 import utils
 import robot
 import bot_scripts
 
 
 def main():
-    # Open Image File
-    img = cv2.imread('Maze.png', 1)
+    # Open Image File as a coloured image
+    img = utils.openImage(bot_scripts.settingsImagePath)
+    # Retrieve threshholded and filtered image
     threshholded = utils.applyVisionFilter(img)
-    bot = robot.Robot(1, 1, Direction.EAST, threshholded)
+    # Initialize Bot with startup settings
+    bot = robot.Robot(x=bot_scripts.settingsStartX, y=bot_scripts.settingsStartY, direction=bot_scripts.settingsFaceDirection,
+                    mazeMap=threshholded, side=len(img)//bot_scripts.settingsGridSideSquares)
 
-    src = bot_scripts.UserKeyRobot(bot)
+    # Initialize user bot scripts
+    src = bot_scripts.settingsSrcClass(bot)
 
+    # Run setup
     src.setup()
     while True:
-        edited = np.copy(img)
-        edited = utils.drawRobot(bot, edited)
-        cv2.imshow('image', edited)
+        # Refresh Screen
+        utils.refreshScreen(img, bot)
+        # Loop
         ret = src.loop()
         if ret == bot_scripts.STOP_SIMULATION:
+            # If stop simulatio signal, Exit
             break
 
 

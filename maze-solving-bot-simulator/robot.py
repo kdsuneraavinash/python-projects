@@ -2,7 +2,17 @@ from datatypes import Point, Direction, UndefinedDirectionError
 
 
 class Robot:
-    def __init__(self, x, y, direction, mazeMap, side=55):
+    def __init__(self, x, y, direction, mazeMap, side):
+        """[summary]
+
+        Arguments:
+            x -- Start X position
+            y -- Start Y position
+            direction -- Start facing direction
+            mazeMap -- Image which is thresholded so that barriers are marked with 0 value (Black)
+            side -- Side length of one block the robot can travel
+        """
+
         self.x = x
         self.y = y
         self.direction = direction
