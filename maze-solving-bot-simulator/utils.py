@@ -27,7 +27,7 @@ def refreshScreen(img, bot, function=None):
         except TypeError:
             print("refreshScreen :: Pass a Function(img) as 'function' :: Skipped")
     botAdded = drawRobot(bot, copy)
-    cv2.imshow('image', botAdded)
+    cv2.imshow('maze-solving-bot-simulator', botAdded)
 
 
 def drawRobot(robot, img):

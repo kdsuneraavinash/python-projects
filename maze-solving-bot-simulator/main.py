@@ -21,7 +21,7 @@ def main():
         # Refresh Screen
         utils.refreshScreen(img, bot)
         # Loop
-        ret = src.loop()
+        ret = src.loop(img)
         if ret == bot_scripts.STOP_SIMULATION:
             # If stop simulatio signal, Exit
             break

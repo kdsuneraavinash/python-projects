@@ -110,14 +110,14 @@ class Robot:
 
         self.__go(forward=False)
 
-    def turnClockwise(self):
+    def turnRight(self):
         """
         Turns 90' clockwise
         """
 
         self.__rotate(clockwise=True)
 
-    def turnCounterClockwise(self):
+    def turnLeft(self):
         """
         Turns 90' counter-clockwise
         """
