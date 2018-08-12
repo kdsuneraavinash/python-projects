@@ -40,6 +40,23 @@ All `userscripts` must,
 - Should NOT include any methods which affects the value of `bot` in `__init__()`
 - `loop` must accept one variable as `img`, but try not to change `img` value. If you change it change it in-place. Can use `img` to tasks such as refreshing window
 
+Sample custom class,
+
+```python
+class CustomClassName:
+    def __init__(self, bot):
+        # Do not add anything more in this function
+        self.bot = bot
+
+    def setup(self):
+        # Add all variable initialization and startup code
+        pass
+
+    def loop(self, img):
+        # Add loop code
+        pass
+```
+
 Furthermore,
 
 - `setup` will run only once at the simulation initialization
