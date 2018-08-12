@@ -24,7 +24,7 @@ def main():
         # Loop
         ret = src.loop(img)
         if ret == bot_scripts.STOP_SIMULATION:
-            # If stop simulatio signal, Exit
+            # If stop simulation signal, Exit
             break
 
 

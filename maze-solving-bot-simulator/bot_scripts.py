@@ -23,7 +23,7 @@ Set these global varible values to set bot settings. Place settings at the end o
 Since bot has no way of knowing some values in real world,
     - Try not to use bot functions rather than basic movement and sensor
     - Try not to use bot postion variables such as bot.x, bot.direction
-    - It is OK to access bot.side because it is known in most situaltions
+    - It is OK to access bot.side because it is known in most situations
     - Try not to use settings values
 """
 import cv2
@@ -108,7 +108,7 @@ class DFS:
     # --------------------------------------------------------------
 
     def tileInTheDirection(self, direction):
-        """ Get the coordinates if the tile in the 'direction'"""
+        """ Get the coordinates of the tile in the 'direction'"""
         dirX = self.x
         dirY = self.y
         if (direction == Direction.EAST):
@@ -323,8 +323,8 @@ class DFS:
 
 
 settingsImagePath = "Maze.png"
-settingsStartX = 14
-settingsStartY = 14
+settingsStartX = 1
+settingsStartY = 1
 settingsFaceDirection = Direction.EAST
 settingsGridSideSquares = 14
 settingsSrcClass = DFS
