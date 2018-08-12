@@ -31,41 +31,76 @@ kWaitDuration = 200
 
 
 class DFS:
-    CROSS_OUT_VISITED = False
-    DRAW_DISTANCES_FROM_CENTER = False
-    DRAW_SHORTEST_PATH = True
-    GO_TO_CENTER = True
 
     def __init__(self, bot):
         self.bot = bot
 
-    def __right(self, refresh):
-        # print("Right")
+    # --------------------------------------------------------------
+    # ROBOT MOVEMENT -----------------------------------------------
+    # --------------------------------------------------------------
+
+    def turnRight(self,  refresh):
+        """Turn the bot 90' right"""
+        self.direction += 1
+        self.direction %= 4
         self.bot.turnRight()
         refresh()
-        self.bot.goForward()
 
-    def __forward(self, refresh):
-        # print("Forward")
-        self.bot.goForward()
-
-    def __left(self, refresh):
-        # print("Left")
+    def turnLeft(self,  refresh):
+        """Turn the bot 90' right"""
+        self.direction -= 1
+        self.direction %= 4
         self.bot.turnLeft()
         refresh()
-        self.bot.goForward()
 
-    def __back(self, refresh):
-        # print("Back")
-        self.bot.turnRight()
-        refresh()
-        self.bot.turnRight()
-        refresh()
+    def goForward(self, refresh):
+        """Goes One step forward"""
+        self.x, self.y = self.tileInTheDirection(self.direction)
         self.bot.goForward()
+        refresh()
 
-    def __directionPoint(self, direction):
-        dirX = self.bot.x
-        dirY = self.bot.y
+    # HIGHER ORDER -------------------------------------------------
+
+    def goToRight(self, refresh):
+        """Goes to Right side tile"""
+        self.turnRight(refresh)
+        self.goForward(refresh)
+
+    def goToLeft(self, refresh):
+        """Goes to Left side tile"""
+        self.turnLeft(refresh)
+        self.goForward(refresh)
+
+    def goBackward(self, refresh):
+        """Goes to tile behind"""
+        self.turnRight(refresh)
+        self.turnRight(refresh)
+        self.goForward(refresh)
+
+    # --------------------------------------------------------------
+    # ROBOT SENSOR DATA --------------------------------------------
+    # --------------------------------------------------------------
+
+    def isWallInFront(self):
+        """Return True if wall is in front"""
+        return self.bot.frontSensor() < self.bot.side
+
+    def isWallInRight(self):
+        """Return True if wall is in right"""
+        return self.bot.rightSensor() < self.bot.side
+
+    def isWallInLeft(self):
+        """Return True if wall is in left"""
+        return self.bot.leftSensor() < self.bot.side
+
+    # --------------------------------------------------------------
+    # HELPER FUNCTIONS ---------------------------------------------
+    # --------------------------------------------------------------
+
+    def tileInTheDirection(self, direction):
+        """ Get the coordinates if the tile in the 'direction'"""
+        dirX = self.x
+        dirY = self.y
         if (direction == Direction.EAST):
             dirX += 1
         elif (direction == Direction.WEST):
@@ -76,7 +111,8 @@ class DFS:
             dirY += 1
         return (dirX, dirY)
 
-    def __addToGraph(self, a, b):
+    def addEdgeBetween(self, a, b):
+        """Adds an edge between A and B"""
         if a not in self.graph:
             self.graph[a] = set()
         if b not in self.graph:
@@ -84,177 +120,189 @@ class DFS:
         self.graph[a].add(b)
         self.graph[b].add(a)
 
-    def __crossOutVisitedPoints(self, img):
-        for point in self.visited:
-            a, b = point
-            c, d = a - 1, b - 1
-            a *= self.bot.side
-            b *= self.bot.side
-            c *= self.bot.side
-            d *= self.bot.side
-            cv2.line(img, (a, b), (c, d), (0, 0, 0), 1)
-            cv2.line(img, (c, b), (a, d), (0, 0, 0), 1)
+    def refreshScreen(self, img):
+        """Refreshes Screen"""
+        utils.refreshScreen(img, self.bot)
+        cv2.waitKey(kWaitDuration)
+
+    # --------------------------------------------------------------
+    # RUNNING ENTRY POINTS -----------------------------------------
+    # --------------------------------------------------------------
 
     def setup(self):
-        self.visited = set()
-        self.graph = {}
-        self.stack = [(settingsStartX, settingsStartY)]
+        """SETUP function"""
+        self.visited = set()  # variable to record visited nodes
+        self.graph = {}  # graph
+        self.stack = [(settingsStartX, settingsStartY)]  # Stack to DFS
+
+        # Have SOME initial values, doesn't matter what the values are
+        self.x = settingsStartX
+        self.y = settingsStartY
+        self.direction = settingsFaceDirection
 
     def loop(self, img):
-        def refresh():
-            if self.CROSS_OUT_VISITED:
-                self.__crossOutVisitedPoints(img)
-            utils.refreshScreen(img, self.bot)
-            cv2.waitKey(kWaitDuration)
+        """Loop Function"""
 
+        # Refresh screen with img (to be passed to movement functions)
+        def refresh(): self.refreshScreen(img)
+
+        if self.stack:
+            return self.discover(refresh)
+        else:
+            return self.goToCenter(refresh, img)
+
+    # --------------------------------------------------------------
+    # LOOP FUNCTIONS -----------------------------------------------
+    # --------------------------------------------------------------
+
+    def discover(self, refresh):
+        """Second half of loop (discovering maze)"""
+
+        # Wait and get pressed key (if key is pressed)
         pressedKey = cv2.waitKey(kWaitDuration)
-
-        if not self.stack:
-            grid = bfs(self.graph)
-
-            if self.DRAW_DISTANCES_FROM_CENTER:
-                for i in range(settingsGridSideSquares):
-                    for j in range(settingsGridSideSquares):
-                        a = i*self.bot.side + 1*self.bot.side//4
-                        b = j*self.bot.side + 3*self.bot.side//4
-                        cv2.putText(
-                            img, str(grid[i][j]), (a, b), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1, cv2.LINE_AA)
-
-            path = shortestPath(grid, self.graph)
-
-            if self.DRAW_SHORTEST_PATH:
-
-                def getMiddle(x, y):
-                    return (x-1) * self.bot.side + self.bot.side//2, (y-1) * self.bot.side + self.bot.side//2
-
-                c, d = getMiddle(settingsStartX, settingsStartY)
-                for node in path:
-                    a, b = c, d
-                    c, d = getMiddle(node[0], node[1])
-                    cv2.line(img, (a, b), (c, d), (0, 0, 255), 5)
-
-            if self.GO_TO_CENTER:
-                for node in path:
-                    frontPoint = self.__directionPoint(self.bot.direction)
-                    rightPoint = self.__directionPoint((self.bot.direction + 1) % 4)
-                    leftPoint = self. __directionPoint((self.bot.direction - 1) % 4)
-                    if node == rightPoint:
-                        self.bot.turnRight()
-                        refresh()
-                    if node == leftPoint:
-                        self.bot.turnLeft()
-                        refresh()
-                    self.__forward(refresh)
-                    refresh()
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
-                return STOP_SIMULATION
-
-            if cv2.waitKey(kWaitDuration) == 27:
-                cv2.destroyAllWindows()
-                return STOP_SIMULATION
-            return
-
+        # If ESC is pressed Exit
         if pressedKey == 27:
             cv2.destroyAllWindows()
             return STOP_SIMULATION
 
-        frontObstacleFree = self.bot.frontSensor() >= self.bot.side
-        leftObstacleFree = self.bot.leftSensor() >= self.bot.side
-        rightObstacleFree = self.bot.rightSensor() >= self.bot.side
+        # Get sensor data
+        noWallInFront = not self.isWallInFront()
+        noWallInLeft = not self.isWallInLeft()
+        noWallInRight = not self.isWallInRight()
 
+        # get neighboring tiles
         # Get current and neighboring points
         thisPoint = self.stack[-1]
-        frontPoint = self.__directionPoint(self.bot.direction)
-        rightPoint = self.__directionPoint((self.bot.direction + 1) % 4)
-        leftPoint = self. __directionPoint((self.bot.direction - 1) % 4)
+        frontPoint = self.tileInTheDirection(self.direction)
+        rightPoint = self.tileInTheDirection((self.direction + 1) % 4)
+        leftPoint = self. tileInTheDirection((self.direction - 1) % 4)
 
         # mark this point as discovered
         self.visited.add(thisPoint)
 
-        # Record all possible turns and ad to the graph
-        if frontObstacleFree:
-            self.__addToGraph(frontPoint, thisPoint)
-        if leftObstacleFree:
-            self.__addToGraph(leftPoint, thisPoint)
-        if rightObstacleFree:
-            self.__addToGraph(rightPoint, thisPoint)
+        # Record all possible turns and add to the graph
+        if noWallInFront:
+            self.addEdgeBetween(frontPoint, thisPoint)
+        if noWallInLeft:
+            self.addEdgeBetween(leftPoint, thisPoint)
+        if noWallInRight:
+            self.addEdgeBetween(rightPoint, thisPoint)
 
+        # For each choice it can take
         for choice in self.graph[thisPoint]:
-            # If found at least un discovered node, travel in it
+            # If choice was not discovered before, do it
             if choice not in self.visited:
                 self.stack.append(choice)
                 break
         else:
-            # No undiscovered nodes near robot
+            # No undiscovered nodes near robot (No choice to make)
             # Start to backtrack
             self.stack.pop()
             if not self.stack:
-                # All done
+                # Came back to initial position
+                # Start second half
                 return
             choice = self.stack[-1]
 
         if choice == frontPoint:
-            self.__forward(refresh)
+            self.goForward(refresh)
         elif choice == leftPoint:
-            self.__left(refresh)
+            self.goToLeft(refresh)
         elif choice == rightPoint:
-            self.__right(refresh)
+            self.goToRight(refresh)
         else:
-            self.__back(refresh)
+            self.goBackward(refresh)
 
+    def goToCenter(self, refresh, img):
+        """Second half of loop (going to center of maze)"""
 
-def bfs(graph):
-    distanceGrid = [
-        [float("inf")] * settingsGridSideSquares for _ in range(settingsGridSideSquares)]
-    start = (settingsGridSideSquares//2 + 1, settingsGridSideSquares//2 + 1)
-    search = (settingsStartX, settingsStartY)
+        # Compute distance Grid and shortest path
+        grid = self.bfs()
+        path = self.shortestPath(grid)
 
-    distanceGrid[start[0]-1][start[0]-1] = 0
-    visited = set()
-    queue = collections.deque([start])
+        # For each node
+        for node in path:
+            # Get points near it (front one is not needed)
+            backPoint = self.tileInTheDirection((self.bot.direction + 2) % 4)
+            rightPoint = self.tileInTheDirection((self.bot.direction + 1) % 4)
+            leftPoint = self. tileInTheDirection((self.bot.direction - 1) % 4)
 
-    while True:
-        node = queue.pop()
-        visited.add(node)
-        a, b = node
-        a, b = a-1, b-1
+            # Go to the next node in path
+            if node == rightPoint:
+                self.turnRight(refresh)
+            elif node == leftPoint:
+                self.turnLeft(refresh)
+            elif node == backPoint:
+                self.turnLeft(refresh)
+                self.turnLeft(refresh)
+            self.goForward(refresh)
 
-        if node == search:
-            break
+        # Wait for Esc press and Exit
+        while cv2.waitKey(kWaitDuration) != 27:
+            pass
+        cv2.destroyAllWindows()
+        return STOP_SIMULATION
 
-        neighbors = graph[node]
-        for neighbor in neighbors:
-            if neighbor not in visited:
-                x, y = neighbor
-                x, y = x-1, y-1
-                queue.appendleft(neighbor)
-                distanceGrid[x][y] = distanceGrid[a][b] + 1
+    # --------------------------------------------------------------
+    # GRAPH THEORY ALGORITHMS --------------------------------------
+    # --------------------------------------------------------------
 
-    return distanceGrid
+    def bfs(self):
+        """USe breadth first seach algorithm to find shotest distance from center point"""
+        distancesGraph = {}
 
+        # BFS from middle to the robot start point
+        start = (settingsGridSideSquares//2 + 1,
+                 settingsGridSideSquares//2 + 1)
+        search = (settingsStartX, settingsStartY)
 
-def shortestPath(distanceGrid, graph):
-    start = (settingsStartX, settingsStartY)
-    path = []
+        distancesGraph[start] = 0
+        queue = collections.deque([start])
 
-    def getDistance(x): return distanceGrid[x[0] - 1][x[1] - 1]
+        while True:
+            # Get next node
+            node = queue.pop()
 
-    node = start
-    nodeVal = getDistance(start)
-    while nodeVal != 0:
-        neighbors = graph[node]
-        minNode = node
-        minVal = getDistance(node)
-        for neighbor in neighbors:
-            val = getDistance(neighbor)
-            if minVal > val:
-                minVal = val
-                minNode = neighbor
-        node = minNode
-        nodeVal = minVal
-        path.append(node)
-    return path
+            if node == search:
+                # If this is the one we need, seach no more
+                break
+
+            for neighbor in self.graph[node]:
+                if neighbor not in distancesGraph:
+                    # If distance to neighbor hasn't been calculated, calculate it
+                    queue.appendleft(neighbor)
+                    distancesGraph[neighbor] = distancesGraph[node] + 1
+
+        return distancesGraph
+
+    def shortestPath(self, distanceGraph):
+        """USe dynamic programming to to find shotest distance path"""
+        # Start from start pos
+        start = (settingsStartX, settingsStartY)
+        path = []
+
+        node = start
+        while True:
+            # Default min point is point itself
+            minNode = node
+            minVal = distanceGraph[node]
+            # Find a neighbor that has lowest distance from center
+            for neighbor in self.graph[node]:
+                # If neighbor is not mapped in distanceGraph then it is a memeber that is far away
+                if neighbor not in distanceGraph:
+                    continue
+                val = distanceGraph[neighbor]
+                if minVal > val:
+                    minVal = val
+                    minNode = neighbor
+            node = minNode
+            # Add node to path
+            path.append(node)
+
+            if minVal == 0:
+                # Center found
+                break
+        return path
 
 
 settingsImagePath = "Maze.png"
