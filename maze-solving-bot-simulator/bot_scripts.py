@@ -27,69 +27,15 @@ import collections
 
 STOP_SIMULATION = 0x435
 
-kWaitDuration = 10
-
-
-class UserKeyRobotCollisionEnabled:
-    def __init__(self, bot):
-        self.bot = bot
-
-    def setup(self):
-        pass
-
-    def loop(self, img):
-        pressedKey = cv2.waitKey(0)
-        if pressedKey == 27:
-            cv2.destroyAllWindows()
-            return STOP_SIMULATION
-        elif pressedKey == ord('w'):
-            distanceToFrontObstacle = self.bot.frontSensor()
-            if distanceToFrontObstacle >= self.bot.side:
-                self.bot.goForward()
-        elif pressedKey == ord('a'):
-            self.bot.turnLeft()
-        elif pressedKey == ord('d'):
-            self.bot.turnRight()
-
-
-class RightHandSide:
-    def __init__(self, bot):
-        self.bot = bot
-
-    def setup(self):
-        pass
-
-    def loop(self, img):
-        def refresh():
-            utils.refreshScreen(img, self.bot)
-            cv2.waitKey(kWaitDuration)
-
-        pressedKey = cv2.waitKey(kWaitDuration)
-        if pressedKey == 27:
-            cv2.destroyAllWindows()
-            return STOP_SIMULATION
-        frontObstacle = self.bot.frontSensor()
-        leftObstacle = self.bot.leftSensor()
-        rightObstacle = self.bot.rightSensor()
-        if (rightObstacle >= self.bot.side):
-            self.bot.turnRight()
-            refresh()
-            self.bot.goForward()
-        elif (frontObstacle >= self.bot.side):
-            self.bot.goForward()
-        elif (leftObstacle >= self.bot.side):
-            self.bot.turnLeft()
-            refresh()
-            self.bot.goForward()
-        else:
-            self.bot.turnRight()
-            refresh()
-            self.bot.turnRight()
-            refresh()
-            self.bot.goForward()
+kWaitDuration = 200
 
 
 class DFS:
+    CROSS_OUT_VISITED = False
+    DRAW_DISTANCES_FROM_CENTER = False
+    DRAW_SHORTEST_PATH = True
+    GO_TO_CENTER = True
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -156,7 +102,8 @@ class DFS:
 
     def loop(self, img):
         def refresh():
-            self.__crossOutVisitedPoints(img)
+            if self.CROSS_OUT_VISITED:
+                self.__crossOutVisitedPoints(img)
             utils.refreshScreen(img, self.bot)
             cv2.waitKey(kWaitDuration)
 
@@ -164,13 +111,46 @@ class DFS:
 
         if not self.stack:
             grid = bfs(self.graph)
-            for i in range(settingsGridSideSquares):
-                for j in range(settingsGridSideSquares):
-                    a = i*self.bot.side + 1*self.bot.side//4
-                    b = j*self.bot.side + 3*self.bot.side//4
-                    cv2.putText(
-                        img, str(grid[i][j]), (a, b), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1, cv2.LINE_AA)
-            if cv2.waitKey(10) == 27:
+
+            if self.DRAW_DISTANCES_FROM_CENTER:
+                for i in range(settingsGridSideSquares):
+                    for j in range(settingsGridSideSquares):
+                        a = i*self.bot.side + 1*self.bot.side//4
+                        b = j*self.bot.side + 3*self.bot.side//4
+                        cv2.putText(
+                            img, str(grid[i][j]), (a, b), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1, cv2.LINE_AA)
+
+            path = shortestPath(grid, self.graph)
+
+            if self.DRAW_SHORTEST_PATH:
+
+                def getMiddle(x, y):
+                    return (x-1) * self.bot.side + self.bot.side//2, (y-1) * self.bot.side + self.bot.side//2
+
+                c, d = getMiddle(settingsStartX, settingsStartY)
+                for node in path:
+                    a, b = c, d
+                    c, d = getMiddle(node[0], node[1])
+                    cv2.line(img, (a, b), (c, d), (0, 0, 255), 5)
+
+            if self.GO_TO_CENTER:
+                for node in path:
+                    frontPoint = self.__directionPoint(self.bot.direction)
+                    rightPoint = self.__directionPoint((self.bot.direction + 1) % 4)
+                    leftPoint = self. __directionPoint((self.bot.direction - 1) % 4)
+                    if node == rightPoint:
+                        self.bot.turnRight()
+                        refresh()
+                    if node == leftPoint:
+                        self.bot.turnLeft()
+                        refresh()
+                    self.__forward(refresh)
+                    refresh()
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+                return STOP_SIMULATION
+
+            if cv2.waitKey(kWaitDuration) == 27:
                 cv2.destroyAllWindows()
                 return STOP_SIMULATION
             return
@@ -226,9 +206,9 @@ class DFS:
 
 def bfs(graph):
     distanceGrid = [
-        [-1] * settingsGridSideSquares for _ in range(settingsGridSideSquares)]
-    search = (8, 8)
-    start = (14, 14)
+        [float("inf")] * settingsGridSideSquares for _ in range(settingsGridSideSquares)]
+    start = (settingsGridSideSquares//2 + 1, settingsGridSideSquares//2 + 1)
+    search = (settingsStartX, settingsStartY)
 
     distanceGrid[start[0]-1][start[0]-1] = 0
     visited = set()
@@ -254,9 +234,32 @@ def bfs(graph):
     return distanceGrid
 
 
+def shortestPath(distanceGrid, graph):
+    start = (settingsStartX, settingsStartY)
+    path = []
+
+    def getDistance(x): return distanceGrid[x[0] - 1][x[1] - 1]
+
+    node = start
+    nodeVal = getDistance(start)
+    while nodeVal != 0:
+        neighbors = graph[node]
+        minNode = node
+        minVal = getDistance(node)
+        for neighbor in neighbors:
+            val = getDistance(neighbor)
+            if minVal > val:
+                minVal = val
+                minNode = neighbor
+        node = minNode
+        nodeVal = minVal
+        path.append(node)
+    return path
+
+
 settingsImagePath = "Maze.png"
-settingsStartX = 1
-settingsStartY = 1
+settingsStartX = 14
+settingsStartY = 14
 settingsFaceDirection = Direction.EAST
 settingsGridSideSquares = 14
 settingsSrcClass = DFS
