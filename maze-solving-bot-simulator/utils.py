@@ -52,13 +52,13 @@ def drawRobot(robot, img):
 
     circleRadius = robot.side * 0.2
     side25p = robot.side * 0.25
-    if (robot.direction == Direction.EAST):
+    if (robot._direction == Direction.EAST):
         circleCenter = middle + (side25p, 0)
-    elif (robot.direction == Direction.WEST):
+    elif (robot._direction == Direction.WEST):
         circleCenter = middle + (-side25p, 0)
-    elif (robot.direction == Direction.NORTH):
+    elif (robot._direction == Direction.NORTH):
         circleCenter = middle + (0, -side25p)
-    elif (robot.direction == Direction.SOUTH):
+    elif (robot._direction == Direction.SOUTH):
         circleCenter = middle + (0, side25p)
     else:
         raise UndefinedDirectionError()
@@ -90,8 +90,27 @@ def applyVisionFilter(img):
     greyscale = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blurred = cv2.medianBlur(greyscale, 5)
     threshholded = cv2.adaptiveThreshold(
-        blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
-    kernel = np.ones((5, 5), np.uint8)
+        blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 5, 3)
+    kernel = np.ones((3, 3), np.uint8)
     dilated = cv2.dilate(threshholded, kernel, iterations=1)
     eroded = cv2.erode(dilated, kernel, iterations=1)
     return eroded
+
+
+def applyGroundFilter(img):
+    """
+    Apply a groumd image to use for sensor functionality
+    Currently tuned for [255,242,0] (yellow)
+
+    Arguments:
+        img -- original image
+
+    Returns:
+        mask after adding the filter (Yellow colored will be 255)
+    """
+
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    lower_yellow = np.array([0,200,0])
+    upper_yellow = np.array([100,255,255])
+    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+    return mask

@@ -19,6 +19,12 @@ Set these global varible values to set bot settings. Place settings at the end o
     - settingsFaceDirection : Direction bot is facing
     - settingsGridSideSquares : Squares per each side in maze grid
     - settingsSrcClass : Default class to load as Src
+
+Since bot has no way of knowing some values in real world,
+    - Try not to use bot functions rather than basic movement and sensor
+    - Try not to use bot postion variables such as bot.x, bot.direction
+    - It is OK to access bot.side because it is known in most situaltions
+    - Try not to use settings values
 """
 import cv2
 from datatypes import Direction
@@ -93,6 +99,10 @@ class DFS:
         """Return True if wall is in left"""
         return self.bot.leftSensor() < self.bot.side
 
+    def isGroundCenter(self):
+        """Check if ground color is center color"""
+        return self.bot.groundSensor()
+
     # --------------------------------------------------------------
     # HELPER FUNCTIONS ---------------------------------------------
     # --------------------------------------------------------------
@@ -131,14 +141,18 @@ class DFS:
 
     def setup(self):
         """SETUP function"""
+        self.start = (1, 1)
+        self.startDirection = Direction.NORTH
+
         self.visited = set()  # variable to record visited nodes
         self.graph = {}  # graph
-        self.stack = [(settingsStartX, settingsStartY)]  # Stack to DFS
+        self.stack = [self.start]  # Stack to DFS
 
         # Have SOME initial values, doesn't matter what the values are
-        self.x = settingsStartX
-        self.y = settingsStartY
-        self.direction = settingsFaceDirection
+        self.x = self.start[0]
+        self.y = self.start[1]
+        self.direction = self.startDirection
+        self.center = self.start
 
     def loop(self, img):
         """Loop Function"""
@@ -179,6 +193,10 @@ class DFS:
 
         # mark this point as discovered
         self.visited.add(thisPoint)
+
+        # Check if this is center tile
+        if self.isGroundCenter():
+            self.center = thisPoint
 
         # Record all possible turns and add to the graph
         if noWallInFront:
@@ -223,9 +241,9 @@ class DFS:
         # For each node
         for node in path:
             # Get points near it (front one is not needed)
-            backPoint = self.tileInTheDirection((self.bot.direction + 2) % 4)
-            rightPoint = self.tileInTheDirection((self.bot.direction + 1) % 4)
-            leftPoint = self. tileInTheDirection((self.bot.direction - 1) % 4)
+            backPoint = self.tileInTheDirection((self.direction + 2) % 4)
+            rightPoint = self.tileInTheDirection((self.direction + 1) % 4)
+            leftPoint = self. tileInTheDirection((self.direction - 1) % 4)
 
             # Go to the next node in path
             if node == rightPoint:
@@ -252,9 +270,8 @@ class DFS:
         distancesGraph = {}
 
         # BFS from middle to the robot start point
-        start = (settingsGridSideSquares//2 + 1,
-                 settingsGridSideSquares//2 + 1)
-        search = (settingsStartX, settingsStartY)
+        start = self.center
+        search = self.start
 
         distancesGraph[start] = 0
         queue = collections.deque([start])
@@ -278,7 +295,7 @@ class DFS:
     def shortestPath(self, distanceGraph):
         """USe dynamic programming to to find shotest distance path"""
         # Start from start pos
-        start = (settingsStartX, settingsStartY)
+        start = self.start 
         path = []
 
         node = start
