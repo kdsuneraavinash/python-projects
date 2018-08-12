@@ -2,16 +2,14 @@
 Define user script here.
 All userscripts must,
     - include a setup() and loop(img) function
-    - include a __init__() method which takes 'bot' parameter
-    - Should NOT include any methods which affects the value of bot in __init__()
+    - call base.UserScript.setup(self) inside setup method
+    - SHOULD NOT include a __init__() method
     - loop must accept one variable as img, but try not to change img value. If you change it change it in-place. Can use img to tasks such as refreshing window
 
 - Setup will run only once at the simulation initialization
 - Loop will run each time screen is updated(by default)
 - You can force screen refresh by util.refreshScreen(), however note that additional loop() functions will not run at these forced refreshes
 - If loop() returns STOP_SIMULATION value, simulation will stop.
-- Call cv2.destroyAllWindows() to close current window. However if not STOP_SIMULATION is issued, new refresh will cause a new window to load.
-- Use cv2.waitKey(0) to wait for a KeyPress
 
 Set these global varible values to set bot settings. Place settings at the end of file.
     - settingsImagePath : Image path of maze
@@ -25,101 +23,24 @@ Since bot has no way of knowing some values in real world,
     - Try not to use bot postion variables such as bot.x, bot.direction
     - It is OK to access bot.side because it is known in most situations
     - Try not to use settings values
+
+Use UserScript variables/methods,
+    - turnRight, turnLeft, goForward, goToRight, goToLeft, goBackward: Movement
+    - isWallInFront, isWallInLeft, isWallInRight: Sensor data
+    - tileInTheDirection, refreshScreen, waitForUserKey, sleep, userPressedExit: Helpers
+    - self.start, self.x, self.y, self.direction, self.waitDuration
 """
-import cv2
 from datatypes import Direction
-import utils
 import collections
+import base
 
 STOP_SIMULATION = 0x435
 
-kWaitDuration = 200
 
-
-class DFS:
-
-    def __init__(self, bot):
-        self.bot = bot
-
-    # --------------------------------------------------------------
-    # ROBOT MOVEMENT -----------------------------------------------
-    # --------------------------------------------------------------
-
-    def turnRight(self,  refresh):
-        """Turn the bot 90' right"""
-        self.direction += 1
-        self.direction %= 4
-        self.bot.turnRight()
-        refresh()
-
-    def turnLeft(self,  refresh):
-        """Turn the bot 90' right"""
-        self.direction -= 1
-        self.direction %= 4
-        self.bot.turnLeft()
-        refresh()
-
-    def goForward(self, refresh):
-        """Goes One step forward"""
-        self.x, self.y = self.tileInTheDirection(self.direction)
-        self.bot.goForward()
-        refresh()
-
-    # HIGHER ORDER -------------------------------------------------
-
-    def goToRight(self, refresh):
-        """Goes to Right side tile"""
-        self.turnRight(refresh)
-        self.goForward(refresh)
-
-    def goToLeft(self, refresh):
-        """Goes to Left side tile"""
-        self.turnLeft(refresh)
-        self.goForward(refresh)
-
-    def goBackward(self, refresh):
-        """Goes to tile behind"""
-        self.turnRight(refresh)
-        self.turnRight(refresh)
-        self.goForward(refresh)
-
-    # --------------------------------------------------------------
-    # ROBOT SENSOR DATA --------------------------------------------
-    # --------------------------------------------------------------
-
-    def isWallInFront(self):
-        """Return True if wall is in front"""
-        return self.bot.frontSensor() < self.bot.side
-
-    def isWallInRight(self):
-        """Return True if wall is in right"""
-        return self.bot.rightSensor() < self.bot.side
-
-    def isWallInLeft(self):
-        """Return True if wall is in left"""
-        return self.bot.leftSensor() < self.bot.side
-
-    def isGroundCenter(self):
-        """Check if ground color is center color"""
-        return self.bot.groundSensor()
-
+class DeapthFirstSearch(base.UserScript):
     # --------------------------------------------------------------
     # HELPER FUNCTIONS ---------------------------------------------
     # --------------------------------------------------------------
-
-    def tileInTheDirection(self, direction):
-        """ Get the coordinates of the tile in the 'direction'"""
-        dirX = self.x
-        dirY = self.y
-        if (direction == Direction.EAST):
-            dirX += 1
-        elif (direction == Direction.WEST):
-            dirX -= 1
-        elif (direction == Direction.NORTH):
-            dirY -= 1
-        elif (direction == Direction.SOUTH):
-            dirY += 1
-        return (dirX, dirY)
 
     def addEdgeBetween(self, a, b):
         """Adds an edge between A and B"""
@@ -130,29 +51,17 @@ class DFS:
         self.graph[a].add(b)
         self.graph[b].add(a)
 
-    def refreshScreen(self, img):
-        """Refreshes Screen"""
-        utils.refreshScreen(img, self.bot)
-        cv2.waitKey(kWaitDuration)
-
     # --------------------------------------------------------------
     # RUNNING ENTRY POINTS -----------------------------------------
     # --------------------------------------------------------------
 
     def setup(self):
-        """SETUP function"""
-        self.start = (1, 1)
-        self.startDirection = Direction.NORTH
+        """Setup function"""
+        base.UserScript.setup(self)
 
         self.visited = set()  # variable to record visited nodes
         self.graph = {}  # graph
         self.stack = [self.start]  # Stack to DFS
-
-        # Have SOME initial values, doesn't matter what the values are
-        self.x = self.start[0]
-        self.y = self.start[1]
-        self.direction = self.startDirection
-        self.center = self.start
 
     def loop(self, img):
         """Loop Function"""
@@ -170,13 +79,10 @@ class DFS:
     # --------------------------------------------------------------
 
     def discover(self, refresh):
-        """Second half of loop (discovering maze)"""
+        """First half of loop (discovering maze)"""
 
         # Wait and get pressed key (if key is pressed)
-        pressedKey = cv2.waitKey(kWaitDuration)
-        # If ESC is pressed Exit
-        if pressedKey == 27:
-            cv2.destroyAllWindows()
+        if self.userPressedExit(10):
             return STOP_SIMULATION
 
         # Get sensor data
@@ -256,9 +162,8 @@ class DFS:
             self.goForward(refresh)
 
         # Wait for Esc press and Exit
-        while cv2.waitKey(kWaitDuration) != 27:
+        while not self.userPressedExit(10):
             pass
-        cv2.destroyAllWindows()
         return STOP_SIMULATION
 
     # --------------------------------------------------------------
@@ -271,7 +176,7 @@ class DFS:
 
         # BFS from middle to the robot start point
         start = self.center
-        search = self.start
+        search = (0, 0)
 
         distancesGraph[start] = 0
         queue = collections.deque([start])
@@ -295,7 +200,7 @@ class DFS:
     def shortestPath(self, distanceGraph):
         """USe dynamic programming to to find shotest distance path"""
         # Start from start pos
-        start = self.start 
+        start = self.start
         path = []
 
         node = start
@@ -327,4 +232,4 @@ settingsStartX = 1
 settingsStartY = 1
 settingsFaceDirection = Direction.EAST
 settingsGridSideSquares = 14
-settingsSrcClass = DFS
+settingsSrcClass = DeapthFirstSearch
