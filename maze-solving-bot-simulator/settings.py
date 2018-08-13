@@ -37,11 +37,13 @@ Use UserScript variables/methods,
 from datatypes import Direction
 # from scripts.depth_first_search import DepthFirstSearch
 # from scripts.right_hand_rule import RightHandRule
-from scripts.flood_fill import FloodFill
+from optimized.optimized_flood_fill import OptimizedFloodFill
+
+# from scripts.flood_fill import FloodFill
 
 settingsImagePath = "Maze.png"
-settingsStartX = 1
+settingsStartX = 14
 settingsStartY = 1
 settingsFaceDirection = Direction.EAST
 settingsGridSideSquares = 14
-settingsSrcClass = FloodFill
+settingsSrcClass = OptimizedFloodFill

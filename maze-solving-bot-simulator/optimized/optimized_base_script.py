@@ -11,7 +11,7 @@ SOUTH = 2
 WEST = 3
 
 # No implementation
-WAIT_DURATION = 50
+WAIT_DURATION = 200
 
 
 class OptimizedUserScript:
@@ -43,7 +43,6 @@ class OptimizedUserScript:
     def loop(self, img: numpy.array):
         """Loop Function"""
         self.img = img
-        self.wait_for_user_key(200)
 
     # ==============================================================
     # DIRECT IMPLEMENTATION IN ARDUINO =============================
@@ -139,7 +138,7 @@ class OptimizedUserScript:
     def refresh_screen(self, img: numpy.array) -> bool:
         """Refreshes Screen"""
         utils.refresh_screen(img, self.bot)
-        return self.__user_pressed_exit(WAIT_DURATION)
+        return self.user_pressed_exit(WAIT_DURATION)
 
     # --------------------------------------------------------------
     # STATIC METHODS -----------------------------------------------
@@ -151,7 +150,7 @@ class OptimizedUserScript:
         return cv2.waitKey(timeout)
 
     @staticmethod
-    def __user_pressed_exit(timeout: int) -> bool:
+    def user_pressed_exit(timeout: int) -> bool:
         """Wait for some time and if Esc pressed exit, otherwise return False"""
         pressed_key = OptimizedUserScript.wait_for_user_key(timeout)
         if pressed_key == 27:
