@@ -1,6 +1,6 @@
 maze-solving-bot-simulator/__pycache__/
 maze-solving-bot-simulator/scripts/__pycache__/
+maze-solving-bot-simulator/optimized/__pycache__/
 maze-solving-bot-simulator/.vscode/
-.vscode/
-.vscode/.ropeproject/
 .idea/
+.vscode/.ropeproject/
