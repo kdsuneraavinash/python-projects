@@ -1,7 +1,5 @@
 class Direction:
-    """
-    Directions enum
-    """
+    """Directions enum"""
 
     NORTH = 0
     EAST = 1
@@ -9,6 +7,12 @@ class Direction:
     WEST = 3
     DIRECTIONS = 4
 
+
+class SimulationRunStatus:
+    """Simulation Run Status enum"""
+
+    STOP_SIMULATION = 0x234
+    RESUME_SIMULATION = 0x345
 
 class Point:
     """Class to define a point in X Y coordinate plane.

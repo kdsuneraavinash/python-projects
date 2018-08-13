@@ -3,7 +3,7 @@ import numpy
 
 import robot
 import utils
-from datatypes import Direction
+from datatypes import Direction, SimulationRunStatus
 
 
 class UserScript:
@@ -136,4 +136,4 @@ class UserScript:
 
     def loop(self, img: numpy.array):
         """Loop Function"""
-        pass
+        return SimulationRunStatus.RESUME_SIMULATION
