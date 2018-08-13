@@ -37,7 +37,7 @@ import collections
 
 import numpy
 
-import base
+import base_script
 import robot
 from datatypes import Direction
 
@@ -45,7 +45,7 @@ STOP_SIMULATION = 0x542
 RESUME_LOOP = 0x546
 
 
-class DepthFirstSearch(base.UserScript):
+class DepthFirstSearch(base_script.UserScript):
     def __init__(self, bot: robot.Robot):
         """Initialize"""
         super().__init__(bot)
@@ -95,7 +95,7 @@ class DepthFirstSearch(base.UserScript):
     # LOOP FUNCTIONS -----------------------------------------------
     # --------------------------------------------------------------
 
-    def discover(self, refresh: function) -> int:
+    def discover(self, refresh) -> int:
         """First half of loop (discovering maze)"""
 
         # Wait and get pressed key (if key is pressed)
@@ -154,7 +154,7 @@ class DepthFirstSearch(base.UserScript):
         else:
             self.go_backward(refresh)
 
-    def go_to_center(self, refresh: function) -> int:
+    def go_to_center(self, refresh) -> int:
         """Second half of loop (going to center of maze)"""
 
         # Compute distance Grid and shortest path

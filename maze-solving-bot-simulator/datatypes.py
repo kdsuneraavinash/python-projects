@@ -11,10 +11,8 @@ class Direction:
 
 
 class Point:
-    """
-    Class to define a point in X Y coordinate plane.
-    Top Left of the screen is (0, 0) and X increases Left to Right and Y increases Top to Bottom.
-    """
+    """Class to define a point in X Y coordinate plane.
+    Top Left of the screen is (0, 0) and X increases Left to Right and Y increases Top to Bottom. """
 
     def __init__(self, x: float, y: float):
         self.x = x

@@ -20,19 +20,19 @@ class UserScript:
     # ROBOT MOVEMENT -----------------------------------------------
     # --------------------------------------------------------------
 
-    def turn_right(self, refresh: function):
+    def turn_right(self, refresh):
         """Turn the bot 90' right"""
         self.direction = (self.direction + 1) % 4
         self.bot.turn_right()
         refresh()
 
-    def turn_left(self, refresh: function):
+    def turn_left(self, refresh):
         """Turn the bot 90' right"""
         self.direction = (self.direction - 1) % 4
         self.bot.turn_left()
         refresh()
 
-    def go_forward(self, refresh: function):
+    def go_forward(self, refresh):
         """Goes One step forward"""
         self.x, self.y = self.tile_in_the_direction(self.direction)
         self.bot.go_forward()
@@ -40,17 +40,17 @@ class UserScript:
 
     # HIGHER ORDER -------------------------------------------------
 
-    def go_to_right(self, refresh: function):
+    def go_to_right(self, refresh):
         """Goes to Right side tile"""
         self.turn_right(refresh)
         self.go_forward(refresh)
 
-    def go_to_left(self, refresh: function):
+    def go_to_left(self, refresh):
         """Goes to Left side tile"""
         self.turn_left(refresh)
         self.go_forward(refresh)
 
-    def go_backward(self, refresh: function):
+    def go_backward(self, refresh):
         """Goes to tile behind"""
         self.turn_right(refresh)
         self.turn_right(refresh)

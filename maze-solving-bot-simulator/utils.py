@@ -11,7 +11,7 @@ def open_image(filename):
     return img
 
 
-def refresh_screen(img: numpy.array, bot: robot.Robot, edit_function: function = None):
+def refresh_screen(img: numpy.array, bot: robot.Robot, edit_function=None):
     """Refreshes Screen. Adds bot position."""
 
     copy = numpy.copy(img)
@@ -67,10 +67,7 @@ def apply_vision_filter(img):
 
 
 def apply_ground_filter(img):
-    """
-    Apply a ground image to use for sensor functionality
-    Currently tuned for [255,242,0] (yellow)
-    """
+    """ Apply a ground image to use for sensor functionality. Currently tuned for [255,242,0] (yellow)"""
 
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     lower_yellow = numpy.array([0, 200, 0])
