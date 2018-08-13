@@ -40,7 +40,7 @@ from datatypes import Direction
 from scripts.flood_fill import FloodFill
 
 settingsImagePath = "Maze.png"
-settingsStartX = 14
+settingsStartX = 1
 settingsStartY = 1
 settingsFaceDirection = Direction.EAST
 settingsGridSideSquares = 14

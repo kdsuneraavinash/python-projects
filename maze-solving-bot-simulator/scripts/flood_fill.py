@@ -3,14 +3,14 @@ import collections
 import cv2
 import numpy
 
-import base_script
 import robot
 import utils
 from datatypes import SimulationRunStatus, Direction
+from scripts import base_script
 
 DEBUG = True
 # Top left = 0, Bottom Left = 1, Bottom Right = 2, Bottom Left = 3
-DEBUG_ROTATE = 3
+DEBUG_ROTATE = 0
 
 
 class FloodFill(base_script.UserScript):
@@ -24,7 +24,6 @@ class FloodFill(base_script.UserScript):
         self.walls: dict = None
 
     def refresh_screen(self, img: numpy.array):
-        img = numpy.copy(img)
         if DEBUG:
             self.show_debug_data(img)
         super().refresh_screen(img)
@@ -255,4 +254,4 @@ class FloodFill(base_script.UserScript):
                 cv2.putText(debug_data, "{:>2} ".format(cell), (left, top), cv2.FONT_HERSHEY_PLAIN,
                             1, (0, 0, 0), 1, cv2.LINE_AA)
 
-        cv2.imshow("debug1", debug_data)
+        cv2.imshow("debug", debug_data)

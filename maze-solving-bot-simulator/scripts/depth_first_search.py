@@ -2,9 +2,9 @@ import collections
 
 import numpy
 
-import base_script
 import robot
 from datatypes import SimulationRunStatus
+from scripts import base_script
 
 
 class DepthFirstSearch(base_script.UserScript):

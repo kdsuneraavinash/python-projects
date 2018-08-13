@@ -1,8 +1,8 @@
 import numpy
 
-import base_script
 import robot
 from datatypes import SimulationRunStatus
+from scripts import base_script
 
 
 class RightHandRule(base_script.UserScript):
