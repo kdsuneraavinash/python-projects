@@ -26,11 +26,11 @@ def draw_robot(bot: robot.Robot, img: numpy.array):
 
     middle = bot._center_point()
 
-    rect_start = middle - bot.side * 0.3
-    rect_end = middle + bot.side * 0.3
+    rect_start = middle - bot.cell_side_length * 0.3
+    rect_end = middle + bot.cell_side_length * 0.3
 
-    circle_radius = bot.side * 0.2
-    side25p = bot.side * 0.25
+    circle_radius = bot.cell_side_length * 0.2
+    side25p = bot.cell_side_length * 0.25
     if bot._direction == Direction.EAST:
         circle_center = middle + (side25p, 0)
     elif bot._direction == Direction.WEST:

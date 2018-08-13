@@ -1,3 +1,5 @@
+import numpy
+
 import robot
 import settings
 import utils
@@ -13,18 +15,21 @@ def main():
     # Initialize Bot with startup settings
     bot = robot.Robot(x=settings.settingsStartX, y=settings.settingsStartY,
                       direction=settings.settingsFaceDirection, wall_map=walls,
-                      ground_map=ground, side=len(img) // settings.settingsGridSideSquares)
+                      ground_map=ground, no_of_squares_per_side=settings.settingsGridSideSquares,
+                      cell_side_length=len(img) // settings.settingsGridSideSquares)
 
     # Initialize user bot scripts
     src = settings.settingsSrcClass(bot)
 
     # Run setup
     src.setup()
+    loop_img = numpy.copy(img)
     while True:
         # Refresh Screen
-        utils.refresh_screen(img, bot)
+        utils.refresh_screen(loop_img, bot)
         # Loop
-        ret = src.loop(img)
+        loop_img = numpy.copy(img)
+        ret = src.loop(loop_img)
         if ret == SimulationRunStatus.STOP_SIMULATION:
             # If stop simulation signal, Exit
             break

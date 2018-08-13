@@ -13,7 +13,7 @@ class UserScript:
         self.direction: int = None
         self.x: int = None
         self.y: int = None
-        self.start: int = None
+        self.start: tuple = None
         self.waitDuration: int = None
         self.img: numpy.array = None
 
@@ -63,15 +63,15 @@ class UserScript:
 
     def is_wall_in_front(self) -> bool:
         """Return True if wall is in front"""
-        return self.bot.front_sensor() < self.bot.side
+        return self.bot.front_sensor() < self.bot.cell_side_length
 
     def is_wall_in_right(self) -> bool:
         """Return True if wall is in right"""
-        return self.bot.right_sensor() < self.bot.side
+        return self.bot.right_sensor() < self.bot.cell_side_length
 
     def is_wall_in_left(self) -> bool:
         """Return True if wall is in left"""
-        return self.bot.left_sensor() < self.bot.side
+        return self.bot.left_sensor() < self.bot.cell_side_length
 
     def is_ground_center(self) -> bool:
         """Check if ground color is center color"""

@@ -4,7 +4,8 @@ from datatypes import Point, Direction
 
 
 class Robot:
-    def __init__(self, x: int, y: int, direction: int, wall_map: np.array, ground_map: np.array, side: int):
+    def __init__(self, x: int, y: int, direction: int, wall_map: np.array, ground_map: np.array,
+                 no_of_squares_per_side: int, cell_side_length: int):
         """[summary]
 
         Arguments:
@@ -21,18 +22,19 @@ class Robot:
         self._direction = direction
         self._wallMap = wall_map
         self._groundMap = ground_map
-        self.side = side
+        self.no_of_squares_per_side = no_of_squares_per_side
+        self.cell_side_length = cell_side_length
         self._ball_color = (0, 0, 0)
 
     def _top_corner_point(self) -> Point:
         """Get the position of vehicle as a Point"""
 
-        return Point(self._x * self.side, self._y * self.side)
+        return Point(self._x * self.cell_side_length, self._y * self.cell_side_length)
 
     def _center_point(self) -> Point:
         """Get the position of vehicle center as a Point"""
 
-        return self._top_corner_point() - self.side * 0.5
+        return self._top_corner_point() - self.cell_side_length * 0.5
 
     def _left_side_direction(self) -> int:
         """Get direction of left side"""
