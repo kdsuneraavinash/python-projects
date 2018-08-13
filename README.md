@@ -88,7 +88,7 @@ Use only these bot values and functions. When implementing the algorithm in `Ard
 
 .
 
-### Screenshot
+### Screenshots
 
 ![maze-solving-bot-simulator](readme/maze-solving-bot-simulator.png)
 

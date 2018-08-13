@@ -1,161 +1,129 @@
-from datatypes import Point, Direction, UndefinedDirectionError
+import numpy as np
+
+from datatypes import Point, Direction
 
 
 class Robot:
-    def __init__(self, x, y, direction, wallMap, groundMap, side):
+    def __init__(self, x: int, y: int, direction: int, wall_map: np.array, ground_map: np.array, side: int):
         """[summary]
 
         Arguments:
             x -- Start X position
             y -- Start Y position
             direction -- Start facing direction
-            mazeMap -- Image which is thresholded so that barriers are marked with 0 value (Black)
+            wall_map -- Image which is filtered so that barriers are marked with 0 value (Black)
+            ground_map -- Image which is filtered so that ground colors are marked with 255 value (White)
             side -- Side length of one block the robot can travel
         """
 
         self._x = x
         self._y = y
         self._direction = direction
-        self._wallMap = wallMap
-        self._groundMap = groundMap
+        self._wallMap = wall_map
+        self._groundMap = ground_map
         self.side = side
 
-    def __topCornerPoint(self):
-        """
-        Get the position of vehicle as a Point
-        """
+    def _top_corner_point(self) -> Point:
+        """Get the position of vehicle as a Point"""
 
-        return Point(self._x*self.side, self._y*self.side)
+        return Point(self._x * self.side, self._y * self.side)
 
-    def __centerPoint(self):
-        """
-        Get the position of vehicle center as a Point
-        """
+    def _center_point(self) -> Point:
+        """Get the position of vehicle center as a Point"""
 
-        return self.__topCornerPoint() - self.side * 0.5
+        return self._top_corner_point() - self.side * 0.5
 
-    def __leftSideDirection(self):
-        """
-        Get direction of left side
-        """
+    def _left_side_direction(self) -> int:
+        """Get direction of left side"""
 
         return (self._direction - 1) % Direction.DIRECTIONS
 
-    def __rightSideDirection(self):
-        """
-        Get direction of right side
-        """
+    def _right_side_direction(self) -> int:
+        """Get direction of right side"""
 
-        return(self._direction + 1) % Direction.DIRECTIONS
+        return (self._direction + 1) % Direction.DIRECTIONS
 
-    def __go(self, forward):
-        """
-        Helper function to go forward/backward
-        """
+    def _go(self, forward: bool):
+        """Helper function to go forward/backward"""
 
-        directionMultiplier = 1 if forward else -1
+        direction_multiplier = 1 if forward else -1
 
-        if (self._direction == Direction.EAST):
-            self._x += directionMultiplier
-        elif (self._direction == Direction.WEST):
-            self._x -= directionMultiplier
-        elif (self._direction == Direction.NORTH):
-            self._y -= directionMultiplier
-        elif (self._direction == Direction.SOUTH):
-            self._y += directionMultiplier
-        else:
-            raise UndefinedDirectionError()
+        if self._direction == Direction.EAST:
+            self._x += direction_multiplier
+        elif self._direction == Direction.WEST:
+            self._x -= direction_multiplier
+        elif self._direction == Direction.NORTH:
+            self._y -= direction_multiplier
+        elif self._direction == Direction.SOUTH:
+            self._y += direction_multiplier
 
-    def __rotate(self, clockwise):
-        """
-        Helper function to turn clockwise/anti-clockwise.
-        """
+    def _rotate(self, clockwise: bool):
+        """Helper function to turn clockwise/anti-clockwise."""
 
         if clockwise:
-            self._direction = self.__rightSideDirection()
+            self._direction = self._right_side_direction()
         else:
-            self._direction = self.__leftSideDirection()
+            self._direction = self._left_side_direction()
 
-    def __sendSignal(self, signalDirection, maxSignalDist=1000, barrierColor=0):
-        """
-        Send a signal and return distance to closest barrier
-        """
+    def _send_signal(self, signal_direction: int, max_signal_dist: int = 1000, barrier_color: int = 0) -> int:
+        """Send a signal and return distance to closest barrier"""
 
-        posX, posY = tuple(self.__centerPoint())
-        for distance in range(maxSignalDist):
-            if self._wallMap[posY, posX] == barrierColor:
+        pos_x, pos_y = tuple(self._center_point())
+        distance = max_signal_dist
+        for distance in range(max_signal_dist):
+            if self._wallMap[pos_y, pos_x] == barrier_color:
                 break
-            if (signalDirection == Direction.EAST):
-                posX += 1
-            elif (signalDirection == Direction.WEST):
-                posX -= 1
-            elif (signalDirection == Direction.NORTH):
-                posY -= 1
-            elif (signalDirection == Direction.SOUTH):
-                posY += 1
-            else:
-                raise UndefinedDirectionError()
+            if signal_direction == Direction.EAST:
+                pos_x += 1
+            elif signal_direction == Direction.WEST:
+                pos_x -= 1
+            elif signal_direction == Direction.NORTH:
+                pos_y -= 1
+            elif signal_direction == Direction.SOUTH:
+                pos_y += 1
         return distance
 
-    def __checkGround(self, trueColor=255):
-        """
-        Check if ground mask color
-        """
-        
-        return self._groundMap[tuple(self.__centerPoint())] == trueColor
+    def _check_ground(self, true_color: int = 255) -> bool:
+        """Check if ground mask color"""
 
-    def goForward(self):
-        """
-        Goes one step forward
-        """
+        return self._groundMap[tuple(self._center_point())] == true_color
 
-        self.__go(forward=True)
+    def go_forward(self):
+        """Goes one step forward"""
 
-    def goBackward(self):
-        """
-        Goes one step backward
-        """
+        self._go(forward=True)
 
-        self.__go(forward=False)
+    def go_backward(self):
+        """Goes one step backward"""
 
-    def turnRight(self):
-        """
-        Turns 90' clockwise
-        """
+        self._go(forward=False)
 
-        self.__rotate(clockwise=True)
+    def turn_right(self):
+        """Turns 90' clockwise"""
 
-    def turnLeft(self):
-        """
-        Turns 90' counter-clockwise
-        """
+        self._rotate(clockwise=True)
 
-        self.__rotate(clockwise=False)
+    def turn_left(self):
+        """Turns 90' counter-clockwise"""
 
-    def frontSensor(self):
-        """
-        Distance from front sensor to object
-        """
+        self._rotate(clockwise=False)
 
-        return self.__sendSignal(self._direction)
+    def front_sensor(self) -> int:
+        """Distance from front sensor to object"""
 
-    def leftSensor(self):
-        """
-        Distance from left sensor to object
-        """
+        return self._send_signal(self._direction)
 
-        return self.__sendSignal(self.__leftSideDirection())
+    def left_sensor(self) -> int:
+        """Distance from left sensor to object"""
 
-    def rightSensor(self):
-        """
-        Distance from right sensor to object
-        """
+        return self._send_signal(self._left_side_direction())
 
-        return self.__sendSignal(self.__rightSideDirection())
+    def right_sensor(self) -> int:
+        """Distance from right sensor to object"""
 
-    def groundSensor(self):
-        """
-        True if ground has the filtered color
-        """
+        return self._send_signal(self._right_side_direction())
 
-        return self.__checkGround()
+    def ground_sensor(self) -> bool:
+        """True if ground has the filtered color"""
+
+        return self._check_ground()

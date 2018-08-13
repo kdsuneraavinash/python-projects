@@ -1,108 +1,123 @@
 import cv2
-from datatypes import Direction
+import numpy
+
+import robot
 import utils
+from datatypes import Direction
 
 
 class UserScript:
 
-    def __init__(self, bot):
+    def __init__(self, bot: robot.Robot):
         self.bot = bot
+        self.direction: int = None
+        self.x: int = None
+        self.y: int = None
+        self.start: int = None
+        self.waitDuration: int = None
 
     # --------------------------------------------------------------
     # ROBOT MOVEMENT -----------------------------------------------
     # --------------------------------------------------------------
 
-    def turnRight(self,  refresh):
+    def turn_right(self, refresh: function):
         """Turn the bot 90' right"""
         self.direction = (self.direction + 1) % 4
-        self.bot.turnRight()
+        self.bot.turn_right()
         refresh()
 
-    def turnLeft(self,  refresh):
+    def turn_left(self, refresh: function):
         """Turn the bot 90' right"""
         self.direction = (self.direction - 1) % 4
-        self.bot.turnLeft()
+        self.bot.turn_left()
         refresh()
 
-    def goForward(self, refresh):
+    def go_forward(self, refresh: function):
         """Goes One step forward"""
-        self.x, self.y = self.tileInTheDirection(self.direction)
-        self.bot.goForward()
+        self.x, self.y = self.tile_in_the_direction(self.direction)
+        self.bot.go_forward()
         refresh()
 
     # HIGHER ORDER -------------------------------------------------
 
-    def goToRight(self, refresh):
+    def go_to_right(self, refresh: function):
         """Goes to Right side tile"""
-        self.turnRight(refresh)
-        self.goForward(refresh)
+        self.turn_right(refresh)
+        self.go_forward(refresh)
 
-    def goToLeft(self, refresh):
+    def go_to_left(self, refresh: function):
         """Goes to Left side tile"""
-        self.turnLeft(refresh)
-        self.goForward(refresh)
+        self.turn_left(refresh)
+        self.go_forward(refresh)
 
-    def goBackward(self, refresh):
+    def go_backward(self, refresh: function):
         """Goes to tile behind"""
-        self.turnRight(refresh)
-        self.turnRight(refresh)
-        self.goForward(refresh)
+        self.turn_right(refresh)
+        self.turn_right(refresh)
+        self.go_forward(refresh)
 
     # --------------------------------------------------------------
     # ROBOT SENSOR DATA --------------------------------------------
     # --------------------------------------------------------------
 
-    def isWallInFront(self):
+    def is_wall_in_front(self) -> bool:
         """Return True if wall is in front"""
-        return self.bot.frontSensor() < self.bot.side
+        return self.bot.front_sensor() < self.bot.side
 
-    def isWallInRight(self):
+    def is_wall_in_right(self) -> bool:
         """Return True if wall is in right"""
-        return self.bot.rightSensor() < self.bot.side
+        return self.bot.right_sensor() < self.bot.side
 
-    def isWallInLeft(self):
+    def is_wall_in_left(self) -> bool:
         """Return True if wall is in left"""
-        return self.bot.leftSensor() < self.bot.side
+        return self.bot.left_sensor() < self.bot.side
 
-    def isGroundCenter(self):
+    def is_ground_center(self) -> bool:
         """Check if ground color is center color"""
-        return self.bot.groundSensor()
+        return self.bot.ground_sensor()
 
     # --------------------------------------------------------------
     # HELPER FUNCTIONS ---------------------------------------------
     # --------------------------------------------------------------
 
-    def tileInTheDirection(self, direction):
+    def tile_in_the_direction(self, direction: int) -> tuple:
         """ Get the coordinates of the tile in the 'direction'"""
-        dirX = self.x
-        dirY = self.y
-        if (direction == Direction.EAST):
-            dirX += 1
-        elif (direction == Direction.WEST):
-            dirX -= 1
-        elif (direction == Direction.NORTH):
-            dirY -= 1
-        elif (direction == Direction.SOUTH):
-            dirY += 1
-        return (dirX, dirY)
+        dir_x = self.x
+        dir_y = self.y
+        if direction == Direction.EAST:
+            dir_x += 1
+        elif direction == Direction.WEST:
+            dir_x -= 1
+        elif direction == Direction.NORTH:
+            dir_y -= 1
+        elif direction == Direction.SOUTH:
+            dir_y += 1
+        return dir_x, dir_y
 
-    def refreshScreen(self, img):
+    def refresh_screen(self, img: numpy.array):
         """Refreshes Screen"""
-        utils.refreshScreen(img, self.bot)
+        utils.refresh_screen(img, self.bot)
         self.sleep(self.waitDuration)
 
-    def waitForUserKey(self, timeout):
+    # --------------------------------------------------------------
+    # STATIC METHODS -----------------------------------------------
+    # --------------------------------------------------------------
+
+    @staticmethod
+    def wait_for_user_key(timeout: int) -> int:
         """Return user interruption"""
         return cv2.waitKey(timeout)
 
-    def sleep(self, timeout):
+    @staticmethod
+    def sleep(timeout: int):
         """Wait for some time"""
-        self.waitForUserKey(timeout)
+        UserScript.wait_for_user_key(timeout)
 
-    def userPressedExit(self, timeout):
+    @staticmethod
+    def user_pressed_exit(timeout: int) -> bool:
         """Wait for some time and if Esc pressed return True"""
-        pressedKey = self.waitForUserKey(timeout)
-        if pressedKey == 27:
+        pressed_key = UserScript.wait_for_user_key(timeout)
+        if pressed_key == 27:
             cv2.destroyAllWindows()
             return True
         return False
@@ -119,6 +134,6 @@ class UserScript:
         self.direction = Direction.NORTH
         self.waitDuration = 100
 
-    def loop(self, img):
+    def loop(self, img: numpy.array):
         """Loop Function"""
-        print("Override loop() method")
+        pass
