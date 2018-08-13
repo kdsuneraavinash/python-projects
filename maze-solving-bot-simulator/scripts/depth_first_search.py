@@ -43,26 +43,19 @@ class DepthFirstSearch(base_script.UserScript):
 
     def loop(self, img: numpy.array) -> int:
         """Loop Function"""
-
-        # Refresh screen with img (to be passed to movement functions)
-        def refresh():
-            self.refresh_screen(img)
+        super().loop(img)
 
         if self.stack:
-            return self.discover(refresh)
+            return self.discover()
         else:
-            return self.go_to_center(refresh)
+            return self.go_to_center()
 
     # --------------------------------------------------------------
     # LOOP FUNCTIONS -----------------------------------------------
     # --------------------------------------------------------------
 
-    def discover(self, refresh) -> int:
+    def discover(self) -> int:
         """First half of loop (discovering maze)"""
-
-        # Wait and get pressed key (if key is pressed)
-        if self.user_pressed_exit(10) == SimulationRunStatus.STOP_SIMULATION:
-            return SimulationRunStatus.STOP_SIMULATION
 
         # Get sensor data
         no_wall_in_front = not self.is_wall_in_front()
@@ -108,15 +101,15 @@ class DepthFirstSearch(base_script.UserScript):
             choice = self.stack[-1]
 
         if choice == front_point:
-            self.go_forward(refresh)
+            self.go_forward()
         elif choice == left_point:
-            self.go_to_left(refresh)
+            self.go_to_left()
         elif choice == right_point:
-            self.go_to_right(refresh)
+            self.go_to_right()
         else:
-            self.go_backward(refresh)
+            self.go_backward()
 
-    def go_to_center(self, refresh) -> int:
+    def go_to_center(self) -> int:
         """Second half of loop (going to center of maze)"""
 
         self.bot.set_ball_color((0, 242, 255))
@@ -133,18 +126,18 @@ class DepthFirstSearch(base_script.UserScript):
 
             # Go to the next node in path
             if node == right_point:
-                self.turn_right(refresh)
+                self.turn_right()
             elif node == left_point:
-                self.turn_left(refresh)
+                self.turn_left()
             elif node == back_point:
-                self.turn_left(refresh)
-                self.turn_left(refresh)
-            self.go_forward(refresh)
+                self.turn_left()
+                self.turn_left()
+            self.go_forward()
         self.bot.set_ball_color((0, 255, 0))
 
-        # Wait for Esc press and Exit
-        while self.user_pressed_exit(100) == SimulationRunStatus.RESUME_SIMULATION:
-            refresh()
+        # Refresh screen until user exits
+        self.refresh_screen(self.img)
+        self.user_pressed_exit(0)
         return SimulationRunStatus.STOP_SIMULATION
 
     # --------------------------------------------------------------

@@ -35,13 +35,13 @@ Use UserScript variables/methods,
 """
 
 from datatypes import Direction
-from scripts.depth_first_search import DepthFirstSearch
+# from scripts.depth_first_search import DepthFirstSearch
 
-# from scripts.right_hand_rule import RightHandRule
+from scripts.right_hand_rule import RightHandRule
 
 settingsImagePath = "Maze.png"
 settingsStartX = 1
 settingsStartY = 1
 settingsFaceDirection = Direction.EAST
 settingsGridSideSquares = 14
-settingsSrcClass = DepthFirstSearch
+settingsSrcClass = RightHandRule

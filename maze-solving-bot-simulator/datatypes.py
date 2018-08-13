@@ -14,6 +14,7 @@ class SimulationRunStatus:
     STOP_SIMULATION = 0x234
     RESUME_SIMULATION = 0x345
 
+
 class Point:
     """Class to define a point in X Y coordinate plane.
     Top Left of the screen is (0, 0) and X increases Left to Right and Y increases Top to Bottom. """

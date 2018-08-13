@@ -15,46 +15,47 @@ class UserScript:
         self.y: int = None
         self.start: int = None
         self.waitDuration: int = None
+        self.img: numpy.array = None
 
     # --------------------------------------------------------------
     # ROBOT MOVEMENT -----------------------------------------------
     # --------------------------------------------------------------
 
-    def turn_right(self, refresh):
+    def turn_right(self):
         """Turn the bot 90' right"""
         self.direction = (self.direction + 1) % 4
         self.bot.turn_right()
-        refresh()
+        self.refresh_screen(self.img)
 
-    def turn_left(self, refresh):
+    def turn_left(self):
         """Turn the bot 90' right"""
         self.direction = (self.direction - 1) % 4
         self.bot.turn_left()
-        refresh()
+        self.refresh_screen(self.img)
 
-    def go_forward(self, refresh):
+    def go_forward(self):
         """Goes One step forward"""
         self.x, self.y = self.tile_in_the_direction(self.direction)
         self.bot.go_forward()
-        refresh()
+        self.refresh_screen(self.img)
 
     # HIGHER ORDER -------------------------------------------------
 
-    def go_to_right(self, refresh):
+    def go_to_right(self, ):
         """Goes to Right side tile"""
-        self.turn_right(refresh)
-        self.go_forward(refresh)
+        self.turn_right()
+        self.go_forward()
 
-    def go_to_left(self, refresh):
+    def go_to_left(self, ):
         """Goes to Left side tile"""
-        self.turn_left(refresh)
-        self.go_forward(refresh)
+        self.turn_left()
+        self.go_forward()
 
-    def go_backward(self, refresh):
+    def go_backward(self):
         """Goes to tile behind"""
-        self.turn_right(refresh)
-        self.turn_right(refresh)
-        self.go_forward(refresh)
+        self.turn_right()
+        self.turn_right()
+        self.go_forward()
 
     # --------------------------------------------------------------
     # ROBOT SENSOR DATA --------------------------------------------
@@ -94,10 +95,10 @@ class UserScript:
             dir_y += 1
         return dir_x, dir_y
 
-    def refresh_screen(self, img: numpy.array):
+    def refresh_screen(self, img: numpy.array) -> bool:
         """Refreshes Screen"""
         utils.refresh_screen(img, self.bot)
-        self.sleep(self.waitDuration)
+        return self.user_pressed_exit(self.waitDuration)
 
     # --------------------------------------------------------------
     # STATIC METHODS -----------------------------------------------
@@ -115,12 +116,12 @@ class UserScript:
 
     @staticmethod
     def user_pressed_exit(timeout: int) -> bool:
-        """Wait for some time and if Esc pressed return True"""
+        """Wait for some time and if Esc pressed exit, otherwise return False"""
         pressed_key = UserScript.wait_for_user_key(timeout)
         if pressed_key == 27:
             cv2.destroyAllWindows()
-            return SimulationRunStatus.STOP_SIMULATION
-        return SimulationRunStatus.RESUME_SIMULATION
+            raise SystemExit
+        return False
 
     # --------------------------------------------------------------
     # RUNNING ENTRY POINTS -----------------------------------------
@@ -136,4 +137,5 @@ class UserScript:
 
     def loop(self, img: numpy.array):
         """Loop Function"""
+        self.img = img
         return SimulationRunStatus.RESUME_SIMULATION

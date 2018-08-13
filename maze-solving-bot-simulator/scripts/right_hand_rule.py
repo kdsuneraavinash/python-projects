@@ -2,6 +2,7 @@ import numpy
 
 import base_script
 import robot
+from datatypes import SimulationRunStatus
 
 
 class RightHandRule(base_script.UserScript):
@@ -19,18 +20,17 @@ class RightHandRule(base_script.UserScript):
 
     def loop(self, img: numpy.array) -> int:
         """Loop Function"""
+        super().loop(img)
 
         # Refresh screen with img (to be passed to movement functions)
-        def refresh():
-            self.refresh_screen(img)
+        while not self.is_ground_center():
+            if not self.is_wall_in_right():
+                self.go_to_right()
+            elif not self.is_wall_in_front():
+                self.go_forward()
+            elif not self.is_wall_in_left():
+                self.go_to_left()
+            else:
+                self.go_backward()
 
-        if not self.is_wall_in_right():
-            self.go_to_right(refresh)
-        elif not self.is_wall_in_front():
-            self.go_forward(refresh)
-        elif not self.is_wall_in_left():
-            self.go_to_left(refresh)
-        else:
-            self.go_backward(refresh)
-
-        return self.user_pressed_exit(100)
+        return SimulationRunStatus.STOP_SIMULATION
