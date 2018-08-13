@@ -19,6 +19,7 @@ class Robot:
 
         self._x = x
         self._y = y
+        self._start = (x, y)
         self._direction = direction
         self._wallMap = wall_map
         self._groundMap = ground_map

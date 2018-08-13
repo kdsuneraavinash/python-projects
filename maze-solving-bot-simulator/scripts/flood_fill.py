@@ -5,7 +5,12 @@ import numpy
 
 import base_script
 import robot
+import utils
 from datatypes import SimulationRunStatus, Direction
+
+DEBUG = True
+# Top left = 0, Bottom Left = 1, Bottom Right = 2, Bottom Left = 3
+DEBUG_ROTATE = 3
 
 
 class FloodFill(base_script.UserScript):
@@ -20,7 +25,8 @@ class FloodFill(base_script.UserScript):
 
     def refresh_screen(self, img: numpy.array):
         img = numpy.copy(img)
-        self.show_debug_data(img)
+        if DEBUG:
+            self.show_debug_data(img)
         super().refresh_screen(img)
 
     def setup(self):
@@ -115,9 +121,10 @@ class FloodFill(base_script.UserScript):
         self.turn_right()
 
         if not direction_assumption_correct:
-            self.direction = Direction.WEST
+            self.direction = Direction.SOUTH
 
         self.facing_direction_discovered = True
+        print(self.direction)
 
     def flood_fill(self, search_pos):
 
@@ -146,8 +153,6 @@ class FloodFill(base_script.UserScript):
                     continue
                 # Skip if has a wall
                 if current in self.walls:
-                    if current == (3, 0):
-                        print()
                     if node in self.walls[current]:
                         continue
                 self.flooded_grid[node[0]][node[1]] = self.flooded_grid[current[0]][current[1]] + 1
@@ -222,13 +227,24 @@ class FloodFill(base_script.UserScript):
         return min_pos
 
     def show_debug_data(self, img: numpy.array):
+        debug_data = numpy.copy(img)
+        utils.draw_robot(self.bot, debug_data)
+
+        for _ in range(DEBUG_ROTATE):
+            debug_data = cv2.rotate(debug_data, cv2.ROTATE_90_CLOCKWISE)
+
+        cv2.circle(debug_data, (self.bot.cell_side_length // 2, self.bot.cell_side_length // 2),
+                   self.bot.cell_side_length // 2, (0, 0, 255), 1)
+        cv2.circle(debug_data, (len(img) // 2, len(img) // 2),
+                   self.bot.cell_side_length, (0, 0, 255), 1)
+
         for wall_a in self.walls:
             left_a = wall_a[0] * self.bot.cell_side_length + self.bot.cell_side_length // 2
             top_a = wall_a[1] * self.bot.cell_side_length + self.bot.cell_side_length // 2
             for wall_b in self.walls[wall_a]:
                 left_b = wall_b[0] * self.bot.cell_side_length + self.bot.cell_side_length // 2
                 top_b = wall_b[1] * self.bot.cell_side_length + self.bot.cell_side_length // 2
-                cv2.line(img, (left_a, top_a), (left_b, top_b), (220, 220, 128), 10)
+                cv2.line(debug_data, (left_a, top_a), (left_b, top_b), (220, 220, 128), 10)
 
         for col_i in range(self.bot.no_of_squares_per_side):
             col = self.flooded_grid[col_i]
@@ -236,5 +252,7 @@ class FloodFill(base_script.UserScript):
                 cell = col[row_i]
                 top = row_i * self.bot.cell_side_length + 3 * self.bot.cell_side_length // 4
                 left = col_i * self.bot.cell_side_length + 1 * self.bot.cell_side_length // 4
-                cv2.putText(img, "{:>2} ".format(cell), (left, top), cv2.FONT_HERSHEY_PLAIN,
+                cv2.putText(debug_data, "{:>2} ".format(cell), (left, top), cv2.FONT_HERSHEY_PLAIN,
                             1, (0, 0, 0), 1, cv2.LINE_AA)
+
+        cv2.imshow("debug1", debug_data)
