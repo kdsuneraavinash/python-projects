@@ -49,7 +49,8 @@ def draw_robot(bot: robot.Robot, img: numpy.array):
     cv2.rectangle(img, tuple(rect_start), tuple(rect_end), color_orange, cv2.FILLED)
     cv2.rectangle(img, tuple(rect_start), tuple(rect_end), color_black, 1)
 
-    cv2.circle(img, tuple(circle_center), int(circle_radius), color_black, cv2.FILLED)
+    cv2.circle(img, tuple(circle_center), int(circle_radius), bot._ball_color, cv2.FILLED)
+    cv2.circle(img, tuple(circle_center), int(circle_radius), color_black, 1)
 
     return img
 

@@ -119,6 +119,7 @@ class DepthFirstSearch(base_script.UserScript):
     def go_to_center(self, refresh) -> int:
         """Second half of loop (going to center of maze)"""
 
+        self.bot.set_ball_color((0, 242, 255))
         # Compute distance Grid and shortest path
         grid = self.bfs()
         path = self.shortest_path(grid)
@@ -139,10 +140,11 @@ class DepthFirstSearch(base_script.UserScript):
                 self.turn_left(refresh)
                 self.turn_left(refresh)
             self.go_forward(refresh)
+        self.bot.set_ball_color((0, 255, 0))
 
         # Wait for Esc press and Exit
-        while self.user_pressed_exit(10) == SimulationRunStatus.RESUME_SIMULATION:
-            pass
+        while self.user_pressed_exit(100) == SimulationRunStatus.RESUME_SIMULATION:
+            refresh()
         return SimulationRunStatus.STOP_SIMULATION
 
     # --------------------------------------------------------------

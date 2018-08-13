@@ -22,6 +22,7 @@ class Robot:
         self._wallMap = wall_map
         self._groundMap = ground_map
         self.side = side
+        self._ball_color = (0, 0, 0)
 
     def _top_corner_point(self) -> Point:
         """Get the position of vehicle as a Point"""
@@ -127,3 +128,8 @@ class Robot:
         """True if ground has the filtered color"""
 
         return self._check_ground()
+
+    def set_ball_color(self, color):
+        """Set ball color of the robot (Analogous to a LED)"""
+
+        self._ball_color = color
