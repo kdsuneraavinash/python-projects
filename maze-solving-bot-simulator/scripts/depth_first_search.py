@@ -61,7 +61,7 @@ class DepthFirstSearch(base_script.UserScript):
         """First half of loop (discovering maze)"""
 
         # Wait and get pressed key (if key is pressed)
-        if self.user_pressed_exit(10):
+        if self.user_pressed_exit(10) == SimulationRunStatus.STOP_SIMULATION:
             return SimulationRunStatus.STOP_SIMULATION
 
         # Get sensor data
@@ -141,7 +141,7 @@ class DepthFirstSearch(base_script.UserScript):
             self.go_forward(refresh)
 
         # Wait for Esc press and Exit
-        while not self.user_pressed_exit(10):
+        while self.user_pressed_exit(10) == SimulationRunStatus.RESUME_SIMULATION:
             pass
         return SimulationRunStatus.STOP_SIMULATION
 

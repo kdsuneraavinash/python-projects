@@ -119,8 +119,8 @@ class UserScript:
         pressed_key = UserScript.wait_for_user_key(timeout)
         if pressed_key == 27:
             cv2.destroyAllWindows()
-            return True
-        return False
+            return SimulationRunStatus.STOP_SIMULATION
+        return SimulationRunStatus.RESUME_SIMULATION
 
     # --------------------------------------------------------------
     # RUNNING ENTRY POINTS -----------------------------------------

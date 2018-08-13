@@ -37,6 +37,8 @@ Use UserScript variables/methods,
 from datatypes import Direction
 from scripts.depth_first_search import DepthFirstSearch
 
+# from scripts.right_hand_rule import RightHandRule
+
 settingsImagePath = "Maze.png"
 settingsStartX = 1
 settingsStartY = 1
