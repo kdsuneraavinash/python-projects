@@ -9,12 +9,13 @@ from datatypes import SimulationRunStatus, Direction
 from scripts import base_script
 
 DEBUG = True
-# Top left = 0, Bottom Left = 1, Bottom Right = 2, Bottom Left = 3
-DEBUG_ROTATE = 0
+# Top left = 0, Bottom Left = 1, Bottom Right = 2, Top Right = 3
+DEBUG_ROTATE = 3
 
 
 class FloodFill(base_script.UserScript):
     def __init__(self, bot: robot.Robot):
+        """Initialize"""
         super().__init__(bot)
         self.facing_direction_discovered: bool = None
         self.path_traced_to_center: bool = None
@@ -24,58 +25,59 @@ class FloodFill(base_script.UserScript):
         self.walls: dict = None
 
     def refresh_screen(self, img: numpy.array):
+        """Refreshes screen. Overrides parent function to show debug window"""
         if DEBUG:
             self.show_debug_data(img)
         super().refresh_screen(img)
 
     def setup(self):
+        """Setup"""
         super().setup()
-        self.facing_direction_discovered = False
-        self.path_traced_to_center = False
-        self.real_run = False
-        self.center = (self.bot.no_of_squares_per_side // 2, self.bot.no_of_squares_per_side // 2)
+        self.facing_direction_discovered = False  # Whether direction which the bot is facing detected
+        self.path_traced_to_center = False  # Whether went to center at least once
+        self.real_run = False  # Whether this is the trip from Start to Center
+        self.center = (self.bot.no_of_squares_per_side // 2, self.bot.no_of_squares_per_side // 2)  # Center coordinates
         self.flooded_grid = [[-1] * self.bot.no_of_squares_per_side for _ in range(self.bot.no_of_squares_per_side)]
-        self.walls = {}
+        self.walls = {}  # All walls
 
     def loop(self, img) -> int:
+        """Loop"""
         super().loop(img)
 
         if not self.facing_direction_discovered:
             self.discover_facing_direction()
-            self.wait_for_user_key(0)
 
         elif not self.path_traced_to_center:
-            self.bot.set_ball_color([53, 216, 255])
-            self.add_walls()
-            self.flood_fill(self.center)
-            self.go_to_best_cell()
-
-            if (self.x, self.y) == self.center:
+            def located():
                 self.path_traced_to_center = True
-                self.wait_for_user_key(0)
+
+            self.traverse_to_point(self.center, [53, 216, 255], located)
 
         elif not self.real_run:
-            self.bot.set_ball_color([140, 110, 90])
-            self.add_walls()
-            self.flood_fill(self.start)
-            self.go_to_best_cell()
-
-            if (self.x, self.y) == self.start:
+            def located():
                 self.real_run = True
-                self.wait_for_user_key(0)
+
+            self.traverse_to_point(self.start, [140, 110, 90], located)
 
         else:
-            self.bot.set_ball_color([0, 255, 0])
-            self.add_walls()
-            self.flood_fill(self.center)
-            self.go_to_best_cell()
-
-            if (self.x, self.y) == self.center:
+            def located():
                 self.real_run = False
-                self.wait_for_user_key(0)
+
+            self.traverse_to_point(self.center, [0, 255, 0], located)
 
         self.user_pressed_exit(self.waitDuration)
         return SimulationRunStatus.RESUME_SIMULATION
+
+    def traverse_to_point(self, target: tuple, ball_color: list, on_locate):
+        """Go to a point while flooding"""
+        self.bot.set_ball_color(ball_color)
+        self.add_walls()
+        self.flood_fill(target)
+        self.go_to_best_cell()
+
+        if (self.x, self.y) == target:
+            on_locate()
+            self.wait_for_user_key(0)
 
     def discover_facing_direction(self):
         """Go some distance and identify which side bot is turned"""
@@ -126,6 +128,7 @@ class FloodFill(base_script.UserScript):
         print(self.direction)
 
     def flood_fill(self, search_pos):
+        """Fill and build flood array"""
 
         # Set all cells to -1 (Unvisited)
         for i in range(self.bot.no_of_squares_per_side):
@@ -173,6 +176,7 @@ class FloodFill(base_script.UserScript):
         self.walls[b].add(a)
 
     def add_walls(self):
+        """Add a wall between 2 nodes"""
         this_node = (self.x, self.y)
         front_node = self.tile_in_the_direction(self.direction)
         right_node = self.tile_in_the_direction((self.direction + 1) % 4)
@@ -185,6 +189,7 @@ class FloodFill(base_script.UserScript):
             self.add_wall_between(this_node, front_node)
 
     def go_to_best_cell(self) -> tuple:
+        """Select best neighbor node and traverse to it"""
         nodes = [(self.x - 1, self.y),
                  (self.x + 1, self.y),
                  (self.x, self.y - 1),

@@ -9,6 +9,9 @@ from datatypes import Direction, SimulationRunStatus
 class UserScript:
 
     def __init__(self, bot: robot.Robot):
+        """Initializing method. Specifies all instance variables used.
+        Values which should be considered as CONSTANTS are given the value
+        and other variables are give 'None' value"""
         self.bot = bot
         self.direction: int = None
         self.x: int = None

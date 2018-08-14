@@ -17,16 +17,14 @@ WAIT_DURATION = 200
 class OptimizedUserScript:
 
     def __init__(self, bot: robot.Robot):
+        """Initialization"""
         self.bot = bot
-
         # Constants
         self.SIDE_SQUARES = bot.no_of_squares_per_side
         self.START = 0
-
         # Positional variables
         self.direction: int = None
         self.pos: int = None
-
         # No implementation in Arduino, so no need to optimize
         self.img: numpy.array = None
 
@@ -50,8 +48,10 @@ class OptimizedUserScript:
 
     def tile_in_the_direction(self, direction: int) -> int:
         """ Get the coordinates of the tile in the 'direction'"""
+        # First extract X, Y coordinates
         x = self.get_x_coord(self.pos)
         y = self.get_y_coord(self.pos)
+        # Then change them
         if direction == EAST:
             x += 1
         elif direction == WEST:
@@ -60,15 +60,19 @@ class OptimizedUserScript:
             y -= 1
         elif direction == SOUTH:
             y += 1
+        # Convert them back
         return self.get_pos(x, y)
 
     def get_x_coord(self, pos):
+        """Retrieve X coordinate from pos"""
         return pos // self.SIDE_SQUARES
 
     def get_y_coord(self, pos):
+        """Retrieve Y coordinate from pos"""
         return pos % self.SIDE_SQUARES
 
     def get_pos(self, x, y):
+        """Convert X, Y to a integer by denoting XY in SIDE_SQUARES base"""
         return x * self.SIDE_SQUARES + y
 
     # ==============================================================

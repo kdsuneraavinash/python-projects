@@ -15,6 +15,7 @@ class DepthFirstSearch(base_script.UserScript):
         self.graph: dict = None
         self.stack: list = None
         self.center: tuple = None
+        self.was_running_before: bool = None
 
     # --------------------------------------------------------------
     # HELPER FUNCTIONS ---------------------------------------------
@@ -40,10 +41,17 @@ class DepthFirstSearch(base_script.UserScript):
         self.visited = set()  # variable to record visited nodes
         self.graph = dict()  # graph
         self.stack = [self.start]  # Stack to DFS
+        self.was_running_before = False  # Variable to record whether script just started to run or has been running
 
     def loop(self, img: numpy.array) -> int:
         """Loop Function"""
         super().loop(img)
+
+        # If just started, position so front is empty
+        if not self.was_running_before:
+            while self.is_wall_in_front():
+                self.turn_right()
+            self.was_running_before = True
 
         if self.stack:
             return self.discover()
@@ -150,7 +158,7 @@ class DepthFirstSearch(base_script.UserScript):
 
         # BFS from middle to the robot start point
         start = self.center
-        search = (0, 0)
+        search = self.start
 
         distances_graph[start] = 0
         queue = collections.deque([start])
