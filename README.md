@@ -192,4 +192,4 @@ There are few changes from normal classes. Other methods, variables are same.
 
 ### Current Implementation
 
-Uses `DepthFirst Search` to traverse the whole grid and remember the graph. Then uses `Breadth First Search` and `Dynamic Programming` when finding shortest distance.
+Uses `Flood Fill Algorithm` to find shortest path.
