@@ -125,7 +125,6 @@ class OptimizedFloodFill(optimized_base_script.OptimizedUserScript):
             self.direction = Direction.SOUTH
 
         self.facing_direction_discovered = True
-        print(self.direction)
 
     def flood_fill(self, search_pos: int):
 

@@ -12,7 +12,7 @@ Small bot to simulate and test maze solving algorithms before designing the robo
 
 ### How to run
 
-Run `run.py` using python 3. Exit by continuously pressing `Esc` several times.
+Run `run.py` using python 3. Exit by continuously pressing `Esc` several times. In default `FloodFill` algorithm, press any key to switch to next mode when bot is waiting for a input.
 
 ### Changing map and other settings
 
