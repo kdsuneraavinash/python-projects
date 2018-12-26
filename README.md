@@ -1,5 +1,24 @@
 # python-projects
 
+## html-preprocessor
+
+Small script to create static web pages using jinja2 syntax. This preprocesses files and generates the website code on the fly. CSS files and JS files will be minified as well.
+
+### Prerequisites
+
+- python 3
+- jinja2
+- watchdog
+- css_html_js_minify
+
+### How to run
+
+Run `preprocessor.py` using python 3. Exit by continuously pressing `Ctrl+C`. You can add your code in `src` folder and output will be generated in `dist` folder.
+
+### Tip
+
+Run `server.bat` in order to run a server on `http://localhost:8000` and test your website. You need to have python 3 in the path.
+
 ## maze-solving-bot-simulator
 
 Small bot to simulate and test maze solving algorithms before designing the robot.
