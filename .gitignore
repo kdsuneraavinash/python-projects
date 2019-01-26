@@ -1,7 +1,7 @@
-maze-solving-bot-simulator/__pycache__/
-maze-solving-bot-simulator/scripts/__pycache__/
-maze-solving-bot-simulator/optimized/__pycache__/
-maze-solving-bot-simulator/.vscode/
+#maze-solving-bot-simulator/__pycache__/
+#maze-solving-bot-simulator/scripts/__pycache__/
+#maze-solving-bot-simulator/optimized/__pycache__/
+#maze-solving-bot-simulator/.vscode/
 .idea/
 .vscode/.ropeproject/
 *.mp4
