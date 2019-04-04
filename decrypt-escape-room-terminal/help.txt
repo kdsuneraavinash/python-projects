@@ -1,0 +1,24 @@
+Available Commands
+=========================================================================
+
+help 			- show this message
+
+list			- list out all the files and folders in current directory
+
+cd [directory_name]	- change directory to directory_name. Can use .. to go up a directory
+		EG:	$ cd game	- go to game folder
+			$ cd folder1	- go to folder1 folder
+			$ cd ..		- go to parent folder
+
+read [file_name]	- read file content
+		EG:	$ read file1	- read file1
+
+extract [file_name]	- extract file
+		EG:	$ extract file3.zip
+
+wget [url]		- downloads from remote server
+		EG:	$ wget 134.23.43.11/h/file.txt
+
+print [file_name]	- prints out a file
+		EG:	$ print file2.pdf
+
