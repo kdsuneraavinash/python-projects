@@ -43,7 +43,7 @@ BUILD COMPLETED: 18.3s
 INSTALATION COMPLETED: 24.5s
 ==========================================================
 
-Uploading into 178.345.235.23/hhtgh.zip
+Uploading into 178.345.235.23/bk.tools.zip
 
 ===========================================================
 2019-04-02 13:44:03 status unpacked libglib2.0-dev:amd64 2.56.3-0ubuntu0.18.04.1

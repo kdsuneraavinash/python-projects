@@ -5,6 +5,7 @@ import cv2
   
 gscale1 = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
 gscale2 = '@%#*+=-:. '
+gscale3 = '█▓▒░ '
   
 def get_average_l(image): 
     # Given PIL Image, return average value of grayscale value 
@@ -16,11 +17,11 @@ def get_average_l(image):
     return np.average(image.reshape(w*h*d)) 
 
 
-def covert_image_to_ascii(file_name, cols, scale, more_levels): 
+def covert_image_to_ascii(file_name, cols, scale, gshade): 
     image = cv2.imread(file_name, 0)
-    return frame_to_ascii_art(image, cols, scale, more_levels)
+    return frame_to_ascii_art(image, cols, scale, gshade)
 
-def frame_to_ascii_art(image, cols, scale, more_levels): 
+def frame_to_ascii_art(image, cols, scale, gshade): 
     """ 
     Given Image and dims (rows, cols) returns an m*n list of Images  
     """
@@ -55,16 +56,12 @@ def frame_to_ascii_art(image, cols, scale, more_levels):
 
             img = image[x1 : x2, y1 : y2]
             avg = int(get_average_l(img)) 
-  
-            if more_levels: 
-                gsval = gscale1[int((avg*69)/255)] 
-            else: 
-                gsval = gscale2[int((avg*9)/255)] 
-  
-            aimg[j] += gsval 
+   
+            gshade_v = gshade[int((avg*(len(gshade)-1))/255)] 
+            aimg[j] += gshade_v
     return aimg 
 
 if __name__ == "__main__":
-    img = covert_image_to_ascii('snapshot.jpeg', 100, None, False)
+    img = covert_image_to_ascii('snapshot.jpeg', 100, None, gscale3)
     img = '\n'.join(img)
     print(img)

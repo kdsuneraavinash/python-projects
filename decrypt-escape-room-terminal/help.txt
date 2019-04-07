@@ -22,3 +22,6 @@ wget [url]		- downloads from remote server
 print [file_name]	- prints out a file
 		EG:	$ print file2.pdf
 
+run [file_name]	- run a executable file
+		EG:	$ run file3.shl
+
