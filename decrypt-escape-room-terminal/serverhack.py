@@ -4,7 +4,6 @@ import os
 from termcolor import colored, cprint
 import time
 import subprocess
-import getpass
 import readline
 import terminal
 import camera
@@ -27,6 +26,9 @@ class VirtualInstance:
         raise NotImplementedError()
 
     def print(self):
+        raise NotImplementedError()
+
+    def run(self):
         raise NotImplementedError()
     
     @staticmethod
@@ -98,7 +100,7 @@ class VirtualInstance:
 
     @staticmethod
     def help_command():
-        with open('help.txt', 'r') as f:
+        with open('help.txt', 'r', encoding="utf-8") as f:
             x = f.read().strip()
         print(colored(
             x,
@@ -227,13 +229,14 @@ class ExecutableFile(VirtualFile):
 
 def server_hack_task():
     terminal.clear_terminal()
-    with open('head2.txt', 'r') as f:
-        print(f.read().strip())
+    with open('head2.txt', 'r', encoding="utf-8") as f:
+        msg = colored(f.read().strip(), 'green', attrs=['bold'])
+        print(msg)
     print()
     
 
     # Server log file
-    with open('server_log.txt', 'r') as f:
+    with open('server_log.txt', 'r', encoding="utf-8") as f:
         server_log_text = f.read().strip()
     server_log = TextFile('server.log', server_log_text)
 
@@ -285,13 +288,17 @@ def server_hack_task():
                 VirtualInstance.run_file_command(current_directory, arg)
             elif command == 'clear':
                 terminal.clear_terminal()
-                with open('head2.txt', 'r') as f:
-                    print(f.read().strip())
+                with open('head2.txt', 'r', encoding="utf-8") as f:
+                    msg = colored(f.read().strip(), 'green', attrs=['bold'])
+                    print(msg)
                 print()
             elif command == 'print':
                 VirtualInstance.print_file_command(current_directory, arg)
             elif command == 'help':
                 VirtualInstance.help_command()
+            elif command == 'exit':
+                terminal.clear_terminal()
+                exit(0)
             else:
                 print("unknown command:", command)
         except NotImplementedError:
@@ -301,19 +308,19 @@ def server_hack_task():
 
 if __name__ == "__main__":
     terminal.clear_terminal()
-    with open('head.txt', 'r') as f:
+    with open('head.txt', 'r', encoding="utf-8") as f:
         msg = colored(terminal.center(f.read()), 'green', attrs=['bold'])
         print(msg)
     while True:
         msg = colored("Enter " + IP + " password: ", 'yellow', attrs=['bold'])
-        x = getpass.getpass(msg)
+        x = input(msg)
         print("Verifing password...")
         if x == SERVER_PASSWORD:
             terminal.show_progress(0.01, 100)
             print()
             print(colored("Logging in...", 'green'))
             terminal.show_progress(0.08, 100)
-            with open('login.txt', 'r') as f:
+            with open('login.txt', 'r', encoding="utf-8") as f:
                 lines = f.readlines()
                 for i, line in enumerate(lines):
                     if i%50 == 0:

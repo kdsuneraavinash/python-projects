@@ -48,7 +48,7 @@ def run_image_processor():
 
     terminal.set_handler(signal_handler)
 
-    with open('cameraclue.txt') as f:
+    with open('cameraclue.txt', encoding="utf-8") as f:
         camera_clue = f.read()
 
     width = terminal.TERMINAL_WIDTH

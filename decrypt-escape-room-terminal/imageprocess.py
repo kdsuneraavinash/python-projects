@@ -5,9 +5,6 @@ import numpy as np
 MAX_ERROR = 25
 MIN_RADIUS = 150
 MAX_RADIUS = 750
-WINDOW_TITLE = 'Camera'
-
-TEXT_POSITION = (50, 100)
 
 
 class DetectedCircle:
@@ -127,12 +124,19 @@ def getArrowFromContour(contour, regionCenter):
     else:
         return None
 
+def getContours(img):
+    v = cv2.findContours(img,
+                        cv2.RETR_TREE,
+                        cv2.CHAIN_APPROX_SIMPLE)
+    try:
+        _, contours, __ = v
+    except:
+        contours, _ = v
+    return contours
 
 def detectCircle(preprocessedImage):
     # Find contours in image
-    _, contours, __ = cv2.findContours(preprocessedImage,
-                                       cv2.RETR_TREE,
-                                       cv2.CHAIN_APPROX_SIMPLE)
+    contours = getContours(preprocessedImage)
 
     # Get circles and filter out None values
     detectedCircles = map(getCircleFromContour, contours)
@@ -154,9 +158,7 @@ def detectArrow(regionOfInterest):
     regionOfInterest = cv2.cvtColor(processedROI, cv2.COLOR_GRAY2RGBA)
 
     # Get all contours
-    _, contours, __ = cv2.findContours(processedROI,
-                                       cv2.RETR_TREE,
-                                       cv2.CHAIN_APPROX_SIMPLE)
+    contours = getContours(processedROI)
 
     regionCenter = (regionOfInterest.shape[0]//2, regionOfInterest.shape[1]//2)
 
