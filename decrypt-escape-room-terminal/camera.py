@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 import math
-import matplotlib.pyplot as plt
+import ascii
+import os
 
 
 MAX_ERROR = 25
@@ -342,8 +343,11 @@ def main():
             break
 
         frame, threshed = process(frame)
-        plt.imshow(frame)
-        break
+        art = ascii.frame_to_ascii_art(frame, 50, 0.5, False)
+        art = '\n'.join(art)
+        os.system('clear')
+        print(art)
+        
 
         #if cv2.waitKey(60) & 0xff == 27:
         #    # Esc press - stop
