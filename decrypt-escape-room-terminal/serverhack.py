@@ -8,9 +8,11 @@ import readline
 import terminal
 import camera
 import importlib
+import codecs
 
 IP = '158.24.64.6'
 SERVER_PASSWORD = '123'
+ENCRYPTION_KEY = ''
 
 class VirtualInstance:
     def __init__(self, name):
@@ -58,10 +60,10 @@ class VirtualInstance:
     def download_file_command(current_directory, zip_file, arg):
         print("verifying url...")
         terminal.show_progress(0.001, 100)
-        if arg.strip() in ['178.345.235.23/bk.tools.zip',
-                            'http://178.345.235.23/bk.tools.zip',
-                            'https://178.345.235.23/bk.tools.zip',
-                            'ftp://178.345.235.23/bk.tools.zip']:
+        if arg.strip() in ['178.345.235.23/tools.zip',
+                            'http://178.345.235.23/tools.zip',
+                            'https://178.345.235.23/tools.zip',
+                            'ftp://178.345.235.23/tools.zip']:
             print("downloading file...")
             terminal.show_progress(0.08, 100)
             current_directory.files.append(zip_file)
@@ -101,7 +103,7 @@ class VirtualInstance:
     @staticmethod
     def help_command():
         with open('help.txt', 'r', encoding="utf-8") as f:
-            x = f.read().strip()
+            x = codecs.escape_decode(f.read().strip())[0].decode()
         print(colored(
             x,
             'white'
@@ -173,8 +175,8 @@ class VirtualFile(VirtualInstance):
 
         return ''.join(
             take_choices(
-                string.ascii_uppercase + string.digits + 
-                string.ascii_lowercase + string.punctuation,
+                (string.ascii_uppercase + string.digits + 
+                string.ascii_lowercase + string.punctuation),
                 self.size
             )
         )
@@ -206,7 +208,7 @@ class PrintableFile(VirtualFile):
         super().__init__(name, 12241, '')
 
     def print(self):
-        subprocess.call(['lp', 'snapshot.jpeg'])
+        subprocess.call(['lp', 'bookclue.jpeg'])
         return True
 
 class ExecutableFile(VirtualFile):
@@ -217,7 +219,7 @@ class ExecutableFile(VirtualFile):
         camera.exit_pressed = False
         print("File is encrypted with a key.")
         x = input("encryption key: ")
-        if x == "camera":
+        if x == ENCRYPTION_KEY:
             camera.run_image_processor()
             time.sleep(1)
             terminal.clear_terminal()
@@ -236,27 +238,29 @@ def server_hack_task():
     
 
     # Server log file
-    with open('server_log.txt', 'r', encoding="utf-8") as f:
+    with open('server_log.txt', 'r', encoding="utf-8-sig") as f:
         server_log_text = f.read().strip()
+    server_log_text = '\033[1m'.join(server_log_text.split("$%B%$"))
+    server_log_text = '\033[0m\033[37m\033[2m'.join(server_log_text.split("$%E%$"))
     server_log = TextFile('server.log', server_log_text)
 
     # Fake files
-    fake_file_1 = TextFile('run.txt', '-- nothing --')
-    fake_file_2 = TextFile('dconf.txt', '-- empty --')
-    fake_file_3 = TextFile('yuri.chr', '-- deleted --')
-    fake_file_4 = TextFile('iporf.chr', '-- nothing --')
-    fake_file_5 = TextFile('abcd.bin', '-- invalid data --')
+    fake_file_1 = TextFile('g.txt', 'camera.exe requires an encryption key which is an addition of 2 strings.')
+    fake_file_2 = TextFile('dconf.txt', 'TIP:\nServers, firewalls, and other IT equipment keep log files that record important events and transactions. Log data can also provide information for identifying and troubleshooting equipment problems including configuration problems and hardware failure.')
+    fake_file_3 = TextFile('yuri.txt', '--- empty file ---')
+    fake_file_4 = TextFile('iporf.txt', 'TIP:\nReading unreadable files (ZIP/EXE/PDF/...) will show binary data. (Random unicode strings)')
+    fake_file_5 = TextFile('abcd.txt', '--- empty file ---')
 
     # Zip file
     printable_file = PrintableFile('cr.pdf')
-    cam_file = ExecutableFile('camera.shl', 'camera.py')
-    zip_file = ZipFile('bk.tools.zip', 0.91, [printable_file, fake_file_1, cam_file])
+    cam_file = ExecutableFile('camera.exe', 'camera.py')
+    zip_file = ZipFile('tools.zip', 0.91, [printable_file, fake_file_1, cam_file])
 
     # Folders
     folder1 = VirtualFolder('log', [server_log], None)
     folder2 = VirtualFolder('usr', [fake_file_2, fake_file_3], None)
     folder3 = VirtualFolder('lib', [fake_file_5], None)
-    root = VirtualFolder('', [folder1, folder2, folder3, fake_file_4], None)
+    root = VirtualFolder('', [folder1, folder2, folder3, fake_file_4, cam_file], None)
     folder1.parent = root
     folder2.parent = root
     folder3.parent = root
@@ -280,7 +284,7 @@ def server_hack_task():
                 current_directory = current_directory.cd(arg)
             elif command == 'read':
                 VirtualInstance.read_file_command(current_directory, arg)
-            elif command == 'wget':
+            elif command == 'download':
                 VirtualInstance.download_file_command(current_directory, zip_file, arg)
             elif command == 'extract':
                 VirtualInstance.extract_file_command(current_directory, arg)
@@ -307,6 +311,11 @@ def server_hack_task():
             print(e)
 
 if __name__ == "__main__":
+    ENCRYPTION_KEY = ""
+    while ENCRYPTION_KEY == "":
+        ENCRYPTION_KEY = input("ENCRYPTION_KEY: ").strip()
+    print("ENCRYPTION_KEY is", ENCRYPTION_KEY)
+    input()
     terminal.clear_terminal()
     with open('head.txt', 'r', encoding="utf-8") as f:
         msg = colored(terminal.center(f.read()), 'green', attrs=['bold'])

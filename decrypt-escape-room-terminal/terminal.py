@@ -5,7 +5,7 @@ import progressbar
 import struct
 
 DEBUG = True
-TERMINAL_WIDTH = 130
+TERMINAL_WIDTH = 140
 TERMINAL_HEIGHT = 55
 
 def center(s):

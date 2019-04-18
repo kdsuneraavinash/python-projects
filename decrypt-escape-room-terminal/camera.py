@@ -66,8 +66,9 @@ def run_image_processor():
         frame, threshed, angle = imageprocess.process(frame)
         frame = cv2.rotate(threshed, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
-        if abs(angle - 72) < 8:
+        if abs(angle - 45) < 8:
             art = camera_clue
+            frame_color = 'white'
             color = 'green'
             attrs = ['bold', 'underline']
             art = art.split('\n')
@@ -76,9 +77,11 @@ def run_image_processor():
             art = ascii.frame_to_ascii_art(frame, img_width, aspect_ratio, ascii.gscale3)
 
             if angle == float("inf"):
+                frame_color = 'yellow'
                 color = 'white'
                 attrs = ['bold', 'blink']
             else:
+                frame_color = 'green'
                 color = 'green'
                 attrs = ['bold']
         
@@ -89,7 +92,7 @@ def run_image_processor():
         text = terminal.center(text)
         text += "Output[]: " + colored(imageprocess.message_from_image_processor, color, attrs=attrs)
         text += "\n\n\n"
-        art = text + colored(art, 'yellow', attrs=['bold'])
+        art = text + colored(art, frame_color, attrs=['bold'])
         terminal.clear_terminal()
         print(art)
 
