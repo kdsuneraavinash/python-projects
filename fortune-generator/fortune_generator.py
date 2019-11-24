@@ -39,7 +39,7 @@ def get_all_top_posts(subreddit, total_items, per_request_limit):
         titles.extend(new_titles)
         print(f"Downloaded {len(titles)}/{total_items} objects", end="\r")
     print()
-    return titles
+    return titles[:total_items]
 
 
 if __name__ == "__main__":
@@ -54,7 +54,10 @@ if __name__ == "__main__":
 
     subreddit = args.subreddit
     total_requested = args.limit
-    per_request = 10
+    if total_requested > 100:
+        per_request = 100
+    else:
+        per_request = total_requested
     titles = get_all_top_posts(subreddit, total_requested, per_request)
 
     with open(subreddit, "w") as f:

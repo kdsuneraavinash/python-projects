@@ -4,6 +4,14 @@ This generates fortunes files from subreddits.
 
 ## Usage
 
+Run using python 3
+
+```bash
+ python fortune_generator.py
+```
+
+Remember to have `argparse` and `requests` dependencies installed.
+
 ```
 usage: fortune_generator.py [-h] [--subreddit SUBREDDIT] [--limit LIMIT]
 
@@ -16,7 +24,13 @@ optional arguments:
 ```
 
 
-Copy the files it generates in to appropriate `/usr/share/fortune/` or `/usr/share/games/fortune/` directory.
+Copy/Move the files it generates in to appropriate `/usr/share/fortune/` or `/usr/share/games/fortune/` directory.
+
+```bash
+sudo mv showerthoughts.dat /usr/share/fortune/ 
+sudo mv showerthoughts /usr/share/fortune/ 
+```
+
 Then you can use it using fortune command.
 
 ```bash
